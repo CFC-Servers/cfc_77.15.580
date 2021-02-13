@@ -3,7 +3,9 @@ Section 580 detects, alerts of, and responds to players who maliciously use net 
 Configuration is currently done from within the code, but will eventually be Convars.
 
 Section 580 completely overwrites `net.Incoming` (vs. wrapping!) on the serverside, so if you have any other addons that do this, they won't play nicely.
+
 This addon aims to be as performant and useful as possible, an emphasis has been placed on efficiency and simplicity.
+
 Moonscript was chosen because GLua kind of sucks and Moonscript makes writing new addons tolerable. We provide auto-compiled code for you, so you can still run this without issue on your server.
 
 ## Dependencies
