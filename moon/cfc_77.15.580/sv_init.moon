@@ -20,7 +20,7 @@ export Section580 =
     alertStaff = (message, level="warning") ->
         -- idk do some stuff here
 
-    Webhooker = WebhookerInterface!
+    Webhooker = WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
     Logger = CFCLogger "CFC_Section580"
 
 timer.Create "CFC_Section580_ClearNetCounts", Section580.netClearTime, 0, -> Section580.netSpam = {}
