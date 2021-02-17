@@ -11,18 +11,11 @@ import flaggedMessages,
        netSpamThreshold,
        netExtremeSpamThreshold,
        netSpam,
+       \warnLog,
+       Alerter,
        Logger,
        Webhooker
        from Section580
-
-sendWebhook = (plySteamID, plyNick, plyIP, identifier, count) ->
-    Webhooker\send "net-spam",
-        steamId: plySteamID
-        name: plyNick
-        ip: plyIP
-        timeframe: netClearTime
-        :identifier
-        :count
 
 net.Incoming = ( len, client ) ->
     len -= 16
@@ -30,28 +23,34 @@ net.Incoming = ( len, client ) ->
 
     return unless strName
 
-    plySteamID = "<Unknown Steam ID>"
+    lowerStr = lower strName
+    plySteamId = "<Unknown Steam ID>"
     plyNick = "<Unknown Player Name>"
     plyIP = "<Unknown Player IP>"
     plyIsValid = IsValid client
 
     if plyIsValid
-        plySteamID = ply\SteamID!
+        plySteamId = ply\SteamID!
         plyNick = ply\Nick!
         plyIP = ply\IPAddress!
 
-    plyNetSpam = rawget netSpam, plySteamID
-    plyNetSpam or= {}
-    plyNetSpam[strName] or= 0
-    plyNetSpam[strName] += 1
+    plyNetSpam = rawget netSpam, plySteamId
 
-    spamCount = rawget plyNetSpam, strName
+    if not plyNetSpam
+        plyNetSpam = {}
+        rawset netSpam, plySteamId, plyNetSpam
+
+    plyNetSpam[lowerStr] or= 0
+    plyNetSpam[lowerStr] += 1
+
+    spamCount = rawget plyNetSpam, lowerStr
 
     if spamCount > netExtremeSpamThreshold
-        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamID}) is spamming: '#{strName}' (Count: #{spamCount} per #{netSpamThreshold} seconds)"
-        Logger\warn alertMessage
-        -- alert staff
-        -- webhooker
+        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netSpamThreshold} seconds)"
+        warnLog alertMessage
+
+        Alerter\alertStaff plySteamId, plyNick, strName, "extreme"
+        Alerter\alertDiscord plySteamId, plyNick, ply\IPAddress!, netSpamThreshold, strName, spamCount
 
         kickReason = "Suspected malicious action"
 
@@ -64,27 +63,25 @@ net.Incoming = ( len, client ) ->
         return
 
     if spamCount > netSpamThreshold
-        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamID}) is spamming: '#{strName}' (Count: #{spamCount} per #{netSpamThreshold} seconds)"
-        Logger\warn alertMessage
-        -- alert staff
-        -- webhooker alert
+        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netSpamThreshold} seconds)"
+        warnLog alertMessage
+        Alerter\alertStaff plySteamId, plyNick, strName, "likely"
 
-    lowerStr = lower strName
     func = rawget Receivers, lowerStr
 
     if not func
         if not ignoredBadMessages, lowerStr
-            Logger\warn "Nonexistent network message sent by #{plyNick} (#{plySteamID})!: '#{strName}'"
+            warnLog "Nonexistent network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
 
         return
 
     if rawget flaggedMessages, str
-        Logger\warn "Flagged network message sent by #{plyNick} (#{plySteamID})!: '#{strName}'"
+        warnLog "Flagged network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
         -- alert staff
         -- webhooker
         return
 
-    status, err = pcall () -> func( len, client )
+    status, err = pcall -> func len, client
     return unless err
 
     Logger\error "Error in network message handler! '#{strName}' errored: '#{err}'"
