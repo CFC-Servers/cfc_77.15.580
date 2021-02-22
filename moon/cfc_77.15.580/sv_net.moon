@@ -30,9 +30,9 @@ net.Incoming = ( len, client ) ->
     plyIsValid = IsValid client
 
     if plyIsValid
-        plySteamId = ply\SteamID!
-        plyNick = ply\Nick!
-        plyIP = ply\IPAddress!
+        plySteamId = client\SteamID!
+        plyNick = client\Nick!
+        plyIP = client\IPAddress!
 
     plyNetSpam = rawget netSpam, plySteamId
 
@@ -50,7 +50,7 @@ net.Incoming = ( len, client ) ->
         warnLog alertMessage
 
         Alerter\alertStaff plySteamId, plyNick, strName, "extreme"
-        Alerter\alertDiscord plySteamId, plyNick, ply\IPAddress!, netSpamThreshold, strName, spamCount
+        Alerter\alertDiscord plySteamId, plyNick, client\IPAddress!, netSpamThreshold, strName, spamCount
 
         kickReason = "Suspected malicious action"
 
