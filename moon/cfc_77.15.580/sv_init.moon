@@ -40,4 +40,3 @@ timer.Create "CFC_Section580_ClearNetCounts", Section580.netClearTime, 0, -> Sec
 timer.Create "CFC_Section580_ClearCmdCounts", Section580.cmdClearTime, 0, -> Section580.cmdSpam = {}
 
 include "sv_net.lua"
-include "sv_cmd.lua"
