@@ -1,19 +1,20 @@
 require "cfclogger"
 
 CurTime = CurTime
+Logger = CFCLogger "CFC Section580"
 
 export Section580 = {
     netClearTime: 1 -- In seconds
-    netSpamThreshold: 25 -- Per netClearTime
-    netExtremeSpamThreshold: 75 -- Per netClearTime
+    netSpamThreshold: 35 -- Per netClearTime
+    netExtremeSpamThreshold: 100 -- Per netClearTime
     netExtremeSpamBanLength: 1 -- In Minutes
-    netShouldBan: true
+    netShouldBan: false
 
     cmdClearTime: 1 -- In seconds
     cmdSpamThreshold: 25 -- Per cmdClearTime
     cmdExtremeSpamThreshold: 75 -- Per cmdClearTime
     cmdExtremeSpamBanLength: 1 -- In Minutes
-    cmdShouldBan: true
+    cmdShouldBan: false
 
     netSpam: {}
     cmdSpam: {}
@@ -24,13 +25,11 @@ export Section580 = {
         rightNow = CurTime!
 
         if not forced
-            if rightNow < @lastWarnLog + @warnLogDelay
-                return
+            return if rightNow < (@lastWarnLog + @warnLogDelay)
 
-        @Logger\warn message
+        Logger\warn message
         @lastWarnLog = rightNow
 
-    Logger: CFCLogger "CFC_Section580"
     Alerter: include "sv_alerter.lua"
 }
 
