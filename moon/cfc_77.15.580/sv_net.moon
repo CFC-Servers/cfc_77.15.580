@@ -70,15 +70,8 @@ net.Incoming = ( len, client ) ->
     func = rawget Receivers, lowerStr
 
     if not func
-        if not ignoredBadMessages, lowerStr
-            warnLog "Nonexistent network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
+        warnLog "Nonexistent network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
 
-        return
-
-    if rawget flaggedMessages, str
-        warnLog "Flagged network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
-        -- alert staff
-        -- webhooker
         return
 
     status, err = pcall -> func len, client
