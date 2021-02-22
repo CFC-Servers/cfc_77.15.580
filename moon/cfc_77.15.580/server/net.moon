@@ -37,10 +37,10 @@ net.Incoming = ( len, client ) ->
     if not Section580.netSpam[plySteamId]
         Section580.netSpam[plySteamId] = {}
 
-    Section580.netSpam[lowerStr] or= 0
-    Section580.netSpam[lowerStr] += 1
+    Section580.netSpam[plySteamId][lowerStr] or= 0
+    Section580.netSpam[plySteamId][lowerStr] += 1
 
-    spamCount = Section580.netSpam[lowerStr][lowerStr]
+    spamCount = Section580.netSpam[plySteamId][lowerStr]
 
     if spamCount > netExtremeSpamThreshold
         alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
