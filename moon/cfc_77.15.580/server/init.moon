@@ -30,10 +30,10 @@ export Section580 = {
         Logger\warn message
         @lastWarnLog = rightNow
 
-    Alerter: include "sv_alerter.lua"
+    Alerter: include "alerter.lua"
 }
 
 timer.Create "CFC_Section580_ClearNetCounts", Section580.netClearTime, 0, -> Section580.netSpam = {}
 timer.Create "CFC_Section580_ClearCmdCounts", Section580.cmdClearTime, 0, -> Section580.cmdSpam = {}
 
-include "sv_net.lua"
+include "net.lua"

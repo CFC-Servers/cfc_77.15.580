@@ -34,16 +34,13 @@ net.Incoming = ( len, client ) ->
         plyNick = client\Nick!
         plyIP = client\IPAddress!
 
-    plyNetSpam = rawget netSpam, plySteamId
+    if not Section580.netSpam[plySteamId]
+        Section580.netSpam[plySteamId] = {}
 
-    if not plyNetSpam
-        plyNetSpam = {}
-        rawset netSpam, plySteamId, plyNetSpam
+    Section580.netSpam[lowerStr] or= 0
+    Section580.netSpam[lowerStr] += 1
 
-    plyNetSpam[lowerStr] or= 0
-    plyNetSpam[lowerStr] += 1
-
-    spamCount = rawget plyNetSpam, lowerStr
+    spamCount = Section580.netSpam[lowerStr][lowerStr]
 
     if spamCount > netExtremeSpamThreshold
         alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
@@ -71,7 +68,6 @@ net.Incoming = ( len, client ) ->
 
     if not func
         warnLog "Nonexistent network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
-
         return
 
     status, err = pcall -> func len, client
