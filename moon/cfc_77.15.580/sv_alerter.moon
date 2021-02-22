@@ -1,6 +1,8 @@
+require "webhooker_interface"
 util.AddNetworkString "AlertNetAbuse"
 
 CurTime = CurTime
+Webhooker = WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
 
 class Alerter
     new: =>
@@ -14,11 +16,11 @@ class Alerter
         @staffAlertDelay = 5 -- How many seconds between staff alerts
         @lastStaffAlerts = {} -- Per steamid
 
-    alertDiscord: (steamId, name, ip, timeframe, identifier, count) ->
+    alertDiscord: (steamId, name, ip, timeframe, identifier, count) =>
         data = :steamId, :name, :ip, :timeframe, :identifier, :count
-        webhookerInterface\send "net-spam", data
+        Webhooker\send "net-spam", data
 
-    alertStaff: (steamId, name, identifier, certainty="likely") ->
+    alertStaff: (steamId, name, identifier, certainty="likely") =>
         rightNow = CurTime!
         lastAlert = @lastStaffAlerts[steamId]
 

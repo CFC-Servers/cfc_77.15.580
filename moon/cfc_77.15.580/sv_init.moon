@@ -1,4 +1,3 @@
-require "webhooker_interface"
 require "cfclogger"
 
 CurTime = CurTime
@@ -31,7 +30,6 @@ export Section580 = {
         @Logger\warn message
         @lastWarnLog = rightNow
 
-    Webhooker: WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
     Logger: CFCLogger "CFC_Section580"
     Alerter: include "sv_alerter.lua"
 }
