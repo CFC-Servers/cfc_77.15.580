@@ -46,7 +46,7 @@ net.Incoming = ( len, client ) ->
     spamCount = rawget plyNetSpam, lowerStr
 
     if spamCount > netExtremeSpamThreshold
-        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netSpamThreshold} seconds)"
+        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
 
         Alerter\alertStaff plySteamId, plyNick, strName, "extreme"
@@ -63,7 +63,7 @@ net.Incoming = ( len, client ) ->
         return
 
     if spamCount > netSpamThreshold
-        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netSpamThreshold} seconds)"
+        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
         Alerter\alertStaff plySteamId, plyNick, strName, "likely"
 

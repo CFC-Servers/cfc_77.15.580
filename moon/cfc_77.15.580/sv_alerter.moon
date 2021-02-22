@@ -6,6 +6,7 @@ Webhooker = WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
 
 class Alerter
     new: =>
+        @shouldWebhook = false
         @shouldAlert =
             "moderator": true
             "developer": true
@@ -17,6 +18,7 @@ class Alerter
         @lastStaffAlerts = {} -- Per steamid
 
     alertDiscord: (steamId, name, ip, timeframe, identifier, count) =>
+
         data = :steamId, :name, :ip, :timeframe, :identifier, :count
         Webhooker\send "net-spam", data
 
@@ -25,7 +27,7 @@ class Alerter
         lastAlert = @lastStaffAlerts[steamId]
 
         if lastAlert
-            return if rightNow < lastAlert + @staffAlertDelay
+            return if rightNow < (lastAlert + @staffAlertDelay)
 
         surrounder = "============================================"
 
@@ -38,11 +40,14 @@ class Alerter
         }
 
         message = [line for line in *message when line ~= nil]
+        PrintTable message
+
         staff = [ply for ply in *player.GetAll! when @shouldAlert[ply\GetUserGroup!]]
 
-        net.Start "AlertNetAbuse"
-        net.WriteTable message
-        net.Send staff
+        if #staff > 0
+            net.Start "AlertNetAbuse"
+            net.WriteTable message
+            net.Send staff
 
         @lastStaffAlerts[steamId] = rightNow
 
