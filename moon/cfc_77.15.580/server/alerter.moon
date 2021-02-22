@@ -4,6 +4,9 @@ util.AddNetworkString "AlertNetAbuse"
 CurTime = CurTime
 Webhooker = WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
 
+RED = Color 255, 0, 0
+YELLOW = Color 255, 255, 0
+
 class Alerter
     new: =>
         @shouldWebhook = false
@@ -18,7 +21,7 @@ class Alerter
         @lastStaffAlerts = {} -- Per steamid
 
     alertDiscord: (steamId, name, ip, timeframe, identifier, count) =>
-
+        return unless @shouldWebhook
         data = :steamId, :name, :ip, :timeframe, :identifier, :count
         Webhooker\send "net-spam", data
 
@@ -32,10 +35,13 @@ class Alerter
         surrounder = "============================================"
 
         message = {
+            RED,
             surrounder,
             "Detected #{certainty} net message spam from '#{name}' (message: '#{identifier}')",
+            YELLOW,
             steamId and "Steam ID: #{steamId}" or nil,
             "This player may be using an exploit to lag or crash the server",
+            RED,
             surrounder
         }
 
