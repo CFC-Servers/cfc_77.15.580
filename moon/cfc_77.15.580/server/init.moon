@@ -5,8 +5,8 @@ Logger = CFCLogger "CFC Section580"
 
 export Section580 = {
     netClearTime: 1 -- In seconds
-    netSpamThreshold: 50 -- Per netClearTime
-    netExtremeSpamThreshold: 100 -- Per netClearTime
+    netSpamThreshold: 85 -- Per netClearTime
+    netExtremeSpamThreshold: 150 -- Per netClearTime
     netExtremeSpamBanLength: 1 -- In Minutes
     netShouldBan: false
 
