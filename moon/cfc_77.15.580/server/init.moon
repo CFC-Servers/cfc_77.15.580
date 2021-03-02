@@ -10,14 +10,7 @@ export Section580 = {
     netExtremeSpamBanLength: 1 -- In Minutes
     netShouldBan: false
 
-    cmdClearTime: 1 -- In seconds
-    cmdSpamThreshold: 25 -- Per cmdClearTime
-    cmdExtremeSpamThreshold: 75 -- Per cmdClearTime
-    cmdExtremeSpamBanLength: 1 -- In Minutes
-    cmdShouldBan: false
-
     netSpam: {}
-    cmdSpam: {}
 
     warnLogDelay: 0.25 -- In seconds, mandatory delay between logs
     lastWarnLog: 0
@@ -34,6 +27,5 @@ export Section580 = {
 }
 
 timer.Create "CFC_Section580_ClearNetCounts", Section580.netClearTime, 0, -> Section580.netSpam = {}
-timer.Create "CFC_Section580_ClearCmdCounts", Section580.cmdClearTime, 0, -> Section580.cmdSpam = {}
 
 include "net.lua"
