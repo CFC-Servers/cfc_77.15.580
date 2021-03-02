@@ -1,5 +1,5 @@
 import ReadTable from net
 
-net.Receive "AlertNetSpam", ->
+net.Receive "AlertNetAbuse", ->
     lines = ReadTable!
     chat.AddText unpack lines
