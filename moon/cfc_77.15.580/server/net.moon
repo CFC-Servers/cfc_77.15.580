@@ -1,4 +1,4 @@
-import Receivers, ReadHeader from net
+import ReadHeader from net
 import NetworkIDToString from util
 import lower from string
 
@@ -6,13 +6,7 @@ rawget = rawget
 pcall = pcall
 
 import flaggedMessages,
-       netClearTime,
-       netShouldBan,
-       netSpamThreshold,
-       netExtremeSpamThreshold,
-       netSpam,
        \warnLog,
-       Alerter,
        Logger,
        Webhooker
        from Section580
@@ -34,24 +28,22 @@ net.Incoming = ( len, client ) ->
         plyNick = client\Nick!
         plyIP = client\IPAddress!
 
-    if not Section580.netSpam[plySteamId]
-        Section580.netSpam[plySteamId] = {}
-
+    Section580.netSpam[plySteamId] or= {}
     Section580.netSpam[plySteamId][lowerStr] or= 0
     Section580.netSpam[plySteamId][lowerStr] += 1
 
     spamCount = Section580.netSpam[plySteamId][lowerStr]
 
-    if spamCount > netExtremeSpamThreshold
-        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
+    if spamCount > Section580.netExtremeSpamThreshold
+        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{Section580.netClearTime} seconds)"
         warnLog alertMessage
 
-        Alerter\alertStaff plySteamId, plyNick, strName, "extreme"
-        Alerter\alertDiscord plySteamId, plyNick, client\IPAddress!, netSpamThreshold, strName, spamCount
+        Section580.Alerter\alertStaff plySteamId, plyNick, strName, "extreme"
+        Section580.Alerter\alertDiscord plySteamId, plyNick, client\IPAddress!, Section580.netSpamThreshold, strName, spamCount
 
         kickReason = "Suspected malicious action"
 
-        if netShouldBan and plyIsValid
+        if Section580.netShouldBan and plyIsValid
             if ULib
                 ULib.ban client, 1, kickReason
             else
@@ -59,12 +51,12 @@ net.Incoming = ( len, client ) ->
 
         return
 
-    if spamCount > netSpamThreshold
-        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
+    if spamCount > Section580.netSpamThreshold
+        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{Section580.netClearTime} seconds)"
         warnLog alertMessage
-        Alerter\alertStaff plySteamId, plyNick, strName, "likely"
+        Section580.Alerter\alertStaff plySteamId, plyNick, strName, "likely"
 
-    func = rawget Receivers, lowerStr
+    func = rawget net.Receivers, lowerStr
 
     if not func
         warnLog "Nonexistent network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
