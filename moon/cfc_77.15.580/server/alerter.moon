@@ -32,14 +32,15 @@ class Alerter
         if lastAlert
             return if rightNow < (lastAlert + @staffAlertDelay)
 
-        surrounder = "============================================"
+        surrounder = "\n============================================\n"
 
         message = {
             RED,
             surrounder,
-            "Detected #{certainty} net message spam from '#{name}' (message: '#{identifier}')",
+            "Detected #{certainty} net message spam from '#{name}'\n",
+            "(message: '#{identifier}')\n",
             YELLOW,
-            steamId and "Steam ID: #{steamId}" or nil,
+            steamId and "Steam ID: #{steamId}\n" or nil,
             "This player may be using an exploit to lag or crash the server",
             RED,
             surrounder
