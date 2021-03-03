@@ -11,6 +11,8 @@ export Section580 = {
     netShouldBan: false
 
     netSpam: {}
+    safeNetMessages:
+        simfphys_mousesteer: true -- Called on "StartCommand", sets mousesteer value serverside
 
     warnLogDelay: 0.25 -- In seconds, mandatory delay between logs
     lastWarnLog: 0

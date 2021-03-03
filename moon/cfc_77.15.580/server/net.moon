@@ -11,22 +11,8 @@ import flaggedMessages,
        Webhooker
        from Section580
 
-net.Incoming = ( len, client ) ->
-    len -= 16
-    strName = NetworkIDToString ReadHeader!
-
-    return unless strName
-
-    lowerStr = lower strName
-    plySteamId = "<Unknown Steam ID>"
-    plyNick = "<Unknown Player Name>"
-    plyIP = "<Unknown Player IP>"
-    plyIsValid = IsValid client
-
-    if plyIsValid
-        plySteamId = client\SteamID!
-        plyNick = client\Nick!
-        plyIP = client\IPAddress!
+tallyUsage = ( message, plySteamId, plyNick, plyIP ) ->
+    return if Section580.safeNetMessages[message]
 
     Section580.netSpam[plySteamId] or= {}
     Section580.netSpam[plySteamId][lowerStr] or= 0
@@ -55,6 +41,26 @@ net.Incoming = ( len, client ) ->
         alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{Section580.netClearTime} seconds)"
         warnLog alertMessage
         Section580.Alerter\alertStaff plySteamId, plyNick, strName, "likely"
+
+
+net.Incoming = ( len, client ) ->
+    len -= 16
+    strName = NetworkIDToString ReadHeader!
+
+    return unless strName
+
+    lowerStr = lower strName
+    plySteamId = "<Unknown Steam ID>"
+    plyNick = "<Unknown Player Name>"
+    plyIP = "<Unknown Player IP>"
+    plyIsValid = IsValid client
+
+    if plyIsValid
+        plySteamId = client\SteamID!
+        plyNick = client\Nick!
+        plyIP = client\IPAddress!
+
+    tallyUsage lowerStr, plySteamId, plyNick, plyIP
 
     func = rawget net.Receivers, lowerStr
 
