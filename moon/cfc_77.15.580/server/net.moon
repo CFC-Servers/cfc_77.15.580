@@ -15,10 +15,10 @@ tallyUsage = ( message, plySteamId, plyNick, plyIP ) ->
     return if Section580.safeNetMessages[message]
 
     Section580.netSpam[plySteamId] or= {}
-    Section580.netSpam[plySteamId][lowerStr] or= 0
-    Section580.netSpam[plySteamId][lowerStr] += 1
+    Section580.netSpam[plySteamId][message] or= 0
+    Section580.netSpam[plySteamId][message] += 1
 
-    spamCount = Section580.netSpam[plySteamId][lowerStr]
+    spamCount = Section580.netSpam[plySteamId][message]
 
     if spamCount > Section580.netExtremeSpamThreshold
         alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{Section580.netClearTime} seconds)"
