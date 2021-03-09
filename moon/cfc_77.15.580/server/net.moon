@@ -7,7 +7,6 @@ pcall = pcall
 
 import flaggedMessages,
        \warnLog,
-       Logger,
        Webhooker
        from Section580
 
@@ -71,5 +70,5 @@ net.Incoming = ( len, client ) ->
     status, err = pcall -> func len, client
     return unless err
 
-    Logger\error "Error in network message handler! '#{strName}' errored: '#{err}'"
+    Section580.Logger\error "Error in network message handler! '#{strName}' errored: '#{err}'"
     return
