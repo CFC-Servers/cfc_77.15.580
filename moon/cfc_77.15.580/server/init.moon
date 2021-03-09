@@ -16,13 +16,14 @@ export Section580 = {
 
     warnLogDelay: 0.25 -- In seconds, mandatory delay between logs
     lastWarnLog: 0
+    Logger: Logger
     warnLog: (message, forced = false) =>
         rightNow = CurTime!
 
         if not forced
             return if rightNow < (@lastWarnLog + @warnLogDelay)
 
-        Logger\warn message
+        @Logger\warn message
         @lastWarnLog = rightNow
 
     Alerter: include "alerter.lua"
