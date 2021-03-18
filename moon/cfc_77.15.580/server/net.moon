@@ -10,7 +10,7 @@ import flaggedMessages,
        Webhooker
        from Section580
 
-tallyUsage = ( message, plySteamId, plyNick, plyIP ) ->
+tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     return if Section580.safeNetMessages[message]
 
     Section580.netSpam[plySteamId] or= {}
@@ -24,15 +24,15 @@ tallyUsage = ( message, plySteamId, plyNick, plyIP ) ->
         warnLog alertMessage
 
         Section580.Alerter\alertStaff plySteamId, plyNick, strName, "extreme"
-        Section580.Alerter\alertDiscord plySteamId, plyNick, client\IPAddress!, Section580.netSpamThreshold, strName, spamCount
+        Section580.Alerter\alertDiscord plySteamId, plyNick, plyIP, Section580.netSpamThreshold, strName, spamCount
 
         kickReason = "Suspected malicious action"
 
         if Section580.netShouldBan and plyIsValid
             if ULib
-                ULib.ban client, 1, kickReason
+                ULib.ban ply, 1, kickReason
             else
-                client\Kick kickReason
+                ply\Kick kickReason
 
         return
 
@@ -59,7 +59,7 @@ net.Incoming = ( len, client ) ->
         plyNick = client\Nick!
         plyIP = client\IPAddress!
 
-    tallyUsage lowerStr, plySteamId, plyNick, plyIP
+    tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
 
     func = rawget net.Receivers, lowerStr
 
