@@ -37,7 +37,8 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     Section580.netSpam[plySteamId].total += 1
 
     totalCount = Section580.netSpam[plySteamId].total
-    spamCount = Section580.netSpam[plySteamId].messages[message]
+    messages = Section580.netSpam[plySteamId].messages
+    spamCount = messages[message]
 
     -- Extreme spam for specific message
     if spamCount > Section580.netExtremeSpamThreshold
@@ -53,6 +54,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     if totalCount > Section580.netTotalSpamThreshold
         alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} messages per #{Section580.netClearTime} seconds"
         warnLog alertMessage
+        PrintTable messages
 
         sendAlert plySteamId, plyNick, plyIP, Section580.netSpamThreshold, spamCount, "extreme"
         bootPlayer ply
