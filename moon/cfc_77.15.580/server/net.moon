@@ -44,9 +44,12 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
 net.Incoming = ( len, client ) ->
     len -= 16
-    strName = NetworkIDToString ReadHeader!
+    header = ReadHeader!
+    strName = NetworkIDToString header
 
-    return unless strName
+    if not strName or strName == "nil"
+        warnLog "Invalid network message sent by '#{client}': Header: '#{header}' | strName: '#{strName}' - ignoring"
+        return
 
     lowerStr = lower strName
     plySteamId = "<Unknown Steam ID>"
