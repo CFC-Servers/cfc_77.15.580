@@ -11,16 +11,14 @@ export Section580 = {
     netExtremeSpamThreshold: 300 -- Per netClearTime
     netExtremeSpamBanLength: 1 -- In Minutes
     netShouldBan: true
-
     netSpam: {}
     safeNetMessages:
         simfphys_mousesteer: true -- Called on "StartCommand", sets mousesteer value serverside
 
     -- Connect spam
-    connectClearTime: 1 -- In seconds
-    connectSpamThreshold: 2 -- Per connectClearTime
+    connectClearTime: 3 -- In seconds
+    connectSpamThreshold: 3 -- Per connectClearTime
     connectSpamBanLength: 5 -- In Minutes
-    connetSpamBanReason: "Too many connections"
     connectShouldBan: true
     connectSpam: {}
 
