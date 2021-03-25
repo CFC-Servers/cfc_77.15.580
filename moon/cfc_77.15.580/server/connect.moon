@@ -1,19 +1,14 @@
-gameevent.Listen "player_connect"
+import \warnLog from Section580
 
-hook.Add "player_connect", "Section580_ConnectionThrottle", (data) ->
-    { :networkid, :userid, :name } = data
+hook.Add "PlayerConnect", "Section580_ConnectionThrottle", (name, ip) ->
+    Section580.connectSpam[ip] or= 0
+    Section580.connectSpam[ip] += 1
 
-    Section580.connectSpam[networkid] or= 0
-    Section580.connectSpam[networkid] += 1
+    if Section580.connectSpam[ip] > Section580.connectSpamThreshold
+        shouldBan = Section580.connectShouldBan
 
-    if Section580.connectSpam[networkid] > Section580.connectSpamThreshold
-        reason = Section580.connectSpamBanReason
-
-        game.KickID userid, reason
-
-        return unless Section580.connectShouldBan
-
-        error "Can't ban: '#{networkid}' for '#{reason}' because ULib doesn't exist!" unless ULib
+        warnLog "Spam connections from IP: #{ip} - Banning: #{shouldBan}", true
+        return unless shouldBan
 
         banLength = Section580.connectSpamBanLength
-        ULib.addBan networkid, banLength, reason, name, "Fishing Regulation"
+        RunConsoleCommand "addip", banLength, ip
