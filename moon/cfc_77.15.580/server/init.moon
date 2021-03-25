@@ -7,6 +7,7 @@ export Section580 = {
     -- Net spam
     netClearTime: 1 -- In seconds
     netSpamThreshold: 150 -- Per netClearTime
+    netTotalSpamThreshold: 500 -- Per netClearTime
     netExtremeSpamThreshold: 300 -- Per netClearTime
     netExtremeSpamBanLength: 1 -- In Minutes
     netShouldBan: true
