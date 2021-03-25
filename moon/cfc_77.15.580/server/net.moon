@@ -73,8 +73,7 @@ net.Incoming = ( len, client ) ->
 
     return unless strName
     if strName == "nil"
-        warnLog "Invalid network message sent by '#{client}': Header: '#{header}' | strName: '#{strName} | len: #{len}' - ignoring"
-        -- return TODO: Decide if we should RERO here
+        warnLog "Invalid network message sent by '#{client}': Header: '#{header}' | strName: '#{strName}' | len: '#{len}'"
 
     lowerStr = lower strName
     plySteamId = "<Unknown Steam ID>"
@@ -88,7 +87,7 @@ net.Incoming = ( len, client ) ->
         plyIP = client\IPAddress!
 
     shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
-    return unless shouldIgnore ~= nil
+    return if shouldIgnore
 
     func = rawget net.Receivers, lowerStr
 
@@ -100,5 +99,5 @@ net.Incoming = ( len, client ) ->
     status, err = pcall -> func len, client
     return unless err
 
-    Section580.Logger\error "Error in network message handler! '#{strName}' errored: '#{err}'"
+    Section580.Logger\error "Error in network message handler! '#{strName}' errored: '#{err}' (Sent by '#{plyNick}'-'#{plySteamId}')"
     return

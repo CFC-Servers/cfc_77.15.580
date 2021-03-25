@@ -19,6 +19,7 @@ export Section580 = {
     connectClearTime: 1 -- In seconds
     connectSpamThreshold: 2 -- Per connectClearTime
     connectSpamBanLength: 5 -- In Minutes
+    connetSpamBanReason: "Too many connections"
     connectShouldBan: true
     connectSpam: {}
 
