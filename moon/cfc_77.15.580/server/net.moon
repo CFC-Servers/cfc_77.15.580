@@ -27,6 +27,7 @@ Section580.updateNetLocals = ->
            netSpamThreshold,
            netExtremeSpamThreshold,
            netTotalSpamThreshold
+           from Section580
 
 netSpam = {}
 timer.Create "CFC_Section580_ClearNetCounts", netClearTime, 0, ->
