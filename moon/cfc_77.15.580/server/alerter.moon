@@ -25,7 +25,8 @@ class Alerter
         data = :steamId, :name, :ip, :timeframe, :identifier, :count
         Webhooker\send "net-spam", data
 
-    alertStaff: (steamId, name, identifier, certainty="likely") =>
+    alertStaff: (steamId, name, identifier="<Varied>", certainty) =>
+        print "alertStaff", steamId, name, identifier, certainty
         rightNow = CurTime!
         lastAlert = @lastStaffAlerts[steamId]
 

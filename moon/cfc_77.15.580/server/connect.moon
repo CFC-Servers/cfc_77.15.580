@@ -23,7 +23,7 @@ timer.Create "CFC_Section580_ClearConnectCounts", connectClearTime, 0, ->
 hook.Add "PlayerConnect", "Section580_ConnectionThrottle", (name, ip) ->
     newAmount = 1
     connectAmount = rawget connectSpam, ip
-    if connectSpam
+    if connectAmount
         newAmount = connectAmount + 1
 
     rawset connectSpam, ip, newAmount
