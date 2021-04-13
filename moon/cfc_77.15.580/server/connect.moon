@@ -1,14 +1,36 @@
-import \warnLog from Section580
+export Section580
+import
+    connectClearTime,
+    connectSpamThreshold,
+    connectShouldBan,
+    connectSpamBanLength,
+    \warnLog
+    from Section580
+
+Section580.updateConnectLocals = ->
+    import
+        connectClearTime,
+        connectSpamThreshold,
+        connectShouldBan,
+        connectSpamBanLength
+        from Section580
+
+connectSpam = {}
+timer.Create "CFC_Section580_ClearConnectCounts", connectClearTime, 0, ->
+    for k in pairs connectSpam
+        rawset connectSpam, k, nil
 
 hook.Add "PlayerConnect", "Section580_ConnectionThrottle", (name, ip) ->
-    Section580.connectSpam[ip] or= 0
-    Section580.connectSpam[ip] += 1
+    newAmount = 1
+    connectAmount = rawget connectSpam, ip
+    if connectSpam
+        newAmount = connectAmount + 1
 
-    if Section580.connectSpam[ip] > Section580.connectSpamThreshold
-        shouldBan = Section580.connectShouldBan
+    rawset connectSpam, ip, newAmount
 
-        warnLog "Spam connections from IP: #{ip} - Banning: #{shouldBan}", true
+    if newAmount > connectSpamThreshold
+        warnLog "Spam connections from IP: #{ip} - Banning: #{connectShouldBan}", true
         return unless shouldBan
 
-        banLength = Section580.connectSpamBanLength
+        banLength = connectSpamBanLength
         RunConsoleCommand "addip", banLength, ip

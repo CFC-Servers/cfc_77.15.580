@@ -11,7 +11,6 @@ export Section580 = {
     netExtremeSpamThreshold: 300 -- Per netClearTime
     netExtremeSpamBanLength: 1 -- In Minutes
     netShouldBan: true
-    netSpam: {}
     safeNetMessages:
         simfphys_mousesteer: true -- Called on "StartCommand", sets mousesteer value serverside
 
@@ -20,7 +19,10 @@ export Section580 = {
     connectSpamThreshold: 3 -- Per connectClearTime
     connectSpamBanLength: 5 -- In Minutes
     connectShouldBan: true
-    connectSpam: {}
+
+    updateLocals: =>
+        @updateConnectLocals!
+        @updateNetLocals!
 
     warnLogDelay: 0.25 -- In seconds, mandatory delay between logs
     lastWarnLog: 0
@@ -37,8 +39,6 @@ export Section580 = {
     Alerter: include "alerter.lua"
 }
 
-timer.Create "CFC_Section580_ClearNetCounts", Section580.netClearTime, 0, -> Section580.netSpam = {}
-timer.Create "CFC_Section580_ClearConnectCounts", Section580.connectClearTime, 0, -> Section580.connectSpam = {}
 
 include "net.lua"
 include "connect.lua"
