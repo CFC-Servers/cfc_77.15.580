@@ -16,6 +16,7 @@ import safeNetMessages,
        netSpamThreshold,
        netExtremeSpamThreshold,
        netTotalSpamThreshold,
+       netShouldBan,
        \warnLog,
        Webhooker
        from Section580
@@ -26,7 +27,8 @@ Section580.updateNetLocals = ->
            netClearTime,
            netSpamThreshold,
            netExtremeSpamThreshold,
-           netTotalSpamThreshold
+           netTotalSpamThreshold,
+           netShouldBan
            from Section580
 
 netSpam = {}
@@ -37,13 +39,14 @@ timer.Create "CFC_Section580_ClearNetCounts", netClearTime, 0, ->
 bootPlayer = ( ply ) ->
     kickReason = "Suspected malicious action"
 
-    if Section580.netShouldBan and plyIsValid
+    if netShouldBan and IsValid ply
         if ULib
             ULib.ban ply, 1, kickReason
         else
             ply\Kick kickReason
 
-sendAlert = (steamId, nick, ip, threshold, strName, spamCount, severity) ->
+sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
+    print "sendAlert", steamId, nick, ip, strName, spamCount, severity
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, netSpamThreshold, strName, spamCount
 
@@ -58,10 +61,6 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
             messages: {}
         }
 
-    -- netSpam[plySteamId].messages[message] or= 0
-    -- netSpam[plySteamId].messages[message] += 1
-    -- netSpam[plySteamId].total += 1
-
     messageCount = rawget(rawget(rawget(netSpam, plySteamId), "messages"), message)
     newCount = 1
     if messageCount
@@ -69,7 +68,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
     rawset(netSpam[plySteamId].messages, message, newCount)
 
-    totalCount = rawget plyInfo, "total"
+    totalCount = rawget(rawget(netSpam, plySteamId), "total")
     newTotal = totalCount + 1
 
     rawset(netSpam[plySteamId], "total", newTotal)
@@ -81,28 +80,28 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
     -- Extreme spam for specific message
     if spamCount > netExtremeSpamThreshold
-        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
+        alertMessage = "Player spamming a network message! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
 
-        sendAlert plySteamId, plyNick, plyIP, netSpamThreshold, spamCount, "extreme"
+        sendAlert plySteamId, plyNick, plyIP, message, spamCount, "extreme"
         bootPlayer ply
 
         return true
 
     -- Extreme spam for all messages
     if totalCount > netTotalSpamThreshold
-        alertMessage = "Player spamming many network messages! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
+        alertMessage = "Player spamming large number of network messages! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
         warnLog alertMessage
         PrintTable messages
 
-        sendAlert plySteamId, plyNick, plyIP, netSpamThreshold, spamCount, "extreme"
+        sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
         bootPlayer ply
 
         return true
 
     -- Likely spam for specific message
     if spamCount > netSpamThreshold
-        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{strName}' (Count: #{spamCount} per #{netClearTime} seconds)"
+        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
         Section580.Alerter\alertStaff plySteamId, plyNick, strName, "likely"
 
