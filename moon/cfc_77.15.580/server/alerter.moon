@@ -1,7 +1,7 @@
 require "webhooker_interface"
 util.AddNetworkString "AlertNetAbuse"
 
-CurTime = CurTime
+SysTime = SysTime
 Webhooker = WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
 
 RED = Color 255, 0, 0
@@ -26,12 +26,13 @@ class Alerter
         Webhooker\send "net-spam", data
 
     alertStaff: (steamId, name, identifier="<Varied>", certainty) =>
-        print "alertStaff", steamId, name, identifier, certainty
-        rightNow = CurTime!
-        lastAlert = @lastStaffAlerts[steamId]
+        rightNow = SysTime!
+        lastAlerts = rawget self, "lastStaffAlerts"
+        lastAlert = rawget lastAlerts, steamId
 
         if lastAlert
-            return if rightNow < (lastAlert + @staffAlertDelay)
+            staffAlertDelay = rawget self, "staffAlertDelay"
+            return if rightNow < (lastAlert + staffAlertDelay)
 
         surrounder = "\n============================================\n"
 
@@ -50,7 +51,7 @@ class Alerter
         message = [line for line in *message when line ~= nil]
         PrintTable message
 
-        staff = [ply for ply in *player.GetAll! when @shouldAlert[ply\GetUserGroup!]]
+        staff = [ply for ply in *player.GetAll! when IsValid(ply) and @shouldAlert[ply\GetUserGroup!]]
 
         if #staff > 0
             net.Start "AlertNetAbuse"
