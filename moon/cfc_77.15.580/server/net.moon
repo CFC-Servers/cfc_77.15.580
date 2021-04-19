@@ -33,20 +33,31 @@ Section580.updateNetLocals = ->
 
 netSpam = {}
 timer.Create "CFC_Section580_ClearNetCounts", netClearTime, 0, ->
-    for k in pairs netSpam
-        rawset netSpam, k, nil
+    for steamId, plyInfo in pairs netSpam
+        messages = rawget plyInfo, "messages"
+        for message in pairs messages
+            rawset messages, message, nil
+
+        rawset plyInfo, "total", nil
+        rawset plyInfo, "messages", nil
+        rawset netSpam, steamId, nil
 
 bootPlayer = ( ply ) ->
     kickReason = "Suspected malicious action"
 
-    if netShouldBan and IsValid ply
-        if ULib
-            ULib.ban ply, 1, kickReason
-        else
-            ply\Kick kickReason
+    return unless netShouldBan
+    return unless IsValid ply
+    return if ply.Section580PendingAction
+
+    ply.Section580PendingAction = true
+
+
+    if ULib
+        ULib.ban ply, 1, kickReason
+    else
+        ply\Kick kickReason
 
 sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
-    print "sendAlert", steamId, nick, ip, strName, spamCount, severity
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, netSpamThreshold, strName, spamCount
 
@@ -61,22 +72,20 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
             messages: {}
         }
 
-    messageCount = rawget(rawget(rawget(netSpam, plySteamId), "messages"), message)
-    newCount = 1
-    if messageCount
-        newCount = messageCount + 1
-
-    rawset(netSpam[plySteamId].messages, message, newCount)
-
-    totalCount = rawget(rawget(netSpam, plySteamId), "total")
-    newTotal = totalCount + 1
-
-    rawset(netSpam[plySteamId], "total", newTotal)
-    totalCount = newTotal
-
     plyInfo = rawget netSpam, plySteamId
     messages = rawget plyInfo, "messages"
+    totalCount = rawget plyInfo, "total"
     spamCount = rawget messages, message
+
+    newCount = 1
+    if spamCount
+        newCount = spamCount + 1
+
+    spamCount = newCount
+    rawset messages, message, newCount
+
+    totalCount = totalCount + 1
+    rawset plyInfo, "total", totalCount
 
     -- Extreme spam for specific message
     if spamCount > netExtremeSpamThreshold
