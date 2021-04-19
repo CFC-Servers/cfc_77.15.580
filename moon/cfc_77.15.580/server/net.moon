@@ -112,7 +112,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     if spamCount > netSpamThreshold
         alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
-        Section580.Alerter\alertStaff plySteamId, plyNick, strName, "likely"
+        Section580.Alerter\alertStaff plySteamId, plyNick, message, "likely"
 
         return true
 
@@ -141,7 +141,7 @@ net.Incoming = ( len, client ) ->
     func = rawget(rawget(net, "Receivers"), lowerStr)
 
     if not func
-        warnLog "Nonexistent network message sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
+        warnLog "Network message with no receivers sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
         return
 
     len -= 16
