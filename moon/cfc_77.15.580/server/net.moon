@@ -90,7 +90,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     -- Extreme spam for specific message
     if spamCount > netExtremeSpamThreshold
         alertMessage = "Player spamming a network message! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
-        warnLog alertMessage
+        warnLog alertMessage, true
 
         sendAlert plySteamId, plyNick, plyIP, message, spamCount, "extreme"
         bootPlayer ply
@@ -100,7 +100,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     -- Extreme spam for all messages
     if totalCount > netTotalSpamThreshold
         alertMessage = "Player spamming large number of network messages! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
-        warnLog alertMessage
+        warnLog alertMessage, true
         PrintTable messages
 
         sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
