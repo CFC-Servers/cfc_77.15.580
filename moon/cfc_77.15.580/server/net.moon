@@ -38,9 +38,23 @@ timer.Create "CFC_Section580_ClearNetCounts", netClearTime, 0, ->
         for message in pairs messages
             rawset messages, message, nil
 
-        rawset plyInfo, "total", nil
-        rawset plyInfo, "messages", nil
-        rawset netSpam, steamId, nil
+        rawset plyInfo, "total", 0
+
+setupPlayer = (_, steamId) ->
+    rawset netSpam, steamId, {
+        total: 0,
+        messages: {}
+    }
+
+gameevent.Listen "player_connect"
+hook.Add "player_connect", "Section580_SetupPlayer", setupPlayer
+
+teardownPlayer = (_, steamId) ->
+    return unless steamId
+    rawset netSpam, steamId, nil
+
+gameevent.Listen "player_disconnect"
+hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
 
 bootPlayer = ( ply ) ->
     kickReason = "Suspected malicious action"
@@ -50,7 +64,6 @@ bootPlayer = ( ply ) ->
     return if ply.Section580PendingAction
 
     ply.Section580PendingAction = true
-
 
     if ULib
         ULib.ban ply, 1, kickReason
@@ -65,14 +78,9 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
 tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     return if rawget safeNetMessages, message
 
-    current = rawget netSpam, plySteamId
-    if not current
-        rawset netSpam, plySteamId, {
-            total: 0
-            messages: {}
-        }
-
     plyInfo = rawget netSpam, plySteamId
+    return true unless plyInfo
+
     messages = rawget plyInfo, "messages"
     totalCount = rawget plyInfo, "total"
     spamCount = rawget messages, message

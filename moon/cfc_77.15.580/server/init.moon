@@ -3,14 +3,25 @@ require "cfclogger"
 CurTime = CurTime
 Logger = CFCLogger "CFC Section580"
 
+prefix = "cfc_section580"
+protected = FCVAR_PROTECTED
+
+netClearTime = CreateConVar "#{prefix}_net_clear_time", 1, protected, "How often to reset net spam budget", 0
+netSpamThreshold = CreateConVar "cfc_section580_net_spam_threshold", 1, protected, "Net spam threshold per clear time for a single message", 1
+netTotalSpamThreshold = CreateConVar "#{prefix}_total_net_spam_threshold", 1, protected, "Net spam threshold per clear time for all messages", 1
+netExtremeSpamThreshold = CreateConVar "#{prefix}_extreme_net_spam_threshold", 1, protected, "Extreme net spam threshold per clear time for a single message (triggers reactions like bans/kicks)", 1
+netExtremeSpamBanLength = CreateConVar "#{prefix}_extreme_net_spam_ban_length", 1, protected, "If enabled, how long to ban clients who trigger the extreme net spam threshold", 1
+netShouldBan = CreateConVar "#{prefix}_should_ban", 1, protected, "Whether or not to ban a client for triggering extreme spam thresholds", 0, 1
+
+
 export Section580 = {
     -- Net spam
-    netClearTime: 1 -- In seconds
-    netSpamThreshold: 150 -- Per netClearTime
-    netTotalSpamThreshold: 500 -- Per netClearTime
-    netExtremeSpamThreshold: 300 -- Per netClearTime
-    netExtremeSpamBanLength: 1 -- In Minutes
-    netShouldBan: true
+    netClearTime: netClearTime\GetFloat!
+    netSpamThreshold: netSpamThreshold\GetInt!
+    netTotalSpamThreshold: netTotalSpamThreshold\GetInt!
+    netExtremeSpamThreshold: netExtremeSpamThreshold\GetInt!
+    netExtremeSpamBanLength: netExtremeSpamBanLength\GetInt!
+    netShouldBan: netShouldBan\GetBool!
     safeNetMessages:
         simfphys_mousesteer: true -- Called on "StartCommand", sets mousesteer value serverside
 
@@ -21,6 +32,13 @@ export Section580 = {
     connectShouldBan: true
 
     updateLocals: =>
+        @netClearTime = netClearTime\GetFloat!
+        @netSpamThreshold = netSpamThreshold\GetInt!
+        @netTotalSpamThreshold = netTotalSpamThreshold\GetInt!
+        @netExtremeSpamThreshold = netExtremeSpamThreshold\GetInt!
+        @netExtremeSpamBanLength = netExtremeSpamBanLength\GetInt!
+        @netShouldBan = netShouldBan\GetBool!
+
         @updateConnectLocals!
         @updateNetLocals!
 
