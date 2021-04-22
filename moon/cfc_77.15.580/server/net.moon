@@ -137,14 +137,17 @@ net.Incoming = ( len, client ) ->
     plyNick = "<Unknown Player Name>"
     plyIP = "<Unknown Player IP>"
     plyIsValid = IsValid client
+    isAdmin = false
 
     if plyIsValid
         plySteamId = client\SteamID!
         plyNick = client\Nick!
         plyIP = client\IPAddress!
+        isAdmin = client\IsAdmin!
 
-    shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
-    return if shouldIgnore
+    unless isAdmin
+        shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
+        return if shouldIgnore
 
     func = rawget(rawget(net, "Receivers"), lowerStr)
 
