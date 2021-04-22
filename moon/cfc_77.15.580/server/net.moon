@@ -46,8 +46,7 @@ setupPlayer = (_, steamId) ->
         messages: {}
     }
 
-gameevent.Listen "player_connect"
-hook.Add "player_connect", "Section580_SetupPlayer", setupPlayer
+hook.Add "PlayerAuthed", "Section580_SetupPlayer", setupPlayer
 
 teardownPlayer = (_, steamId) ->
     return unless steamId
