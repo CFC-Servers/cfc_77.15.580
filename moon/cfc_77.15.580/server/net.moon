@@ -45,12 +45,14 @@ setupPlayer = (_, steamId) ->
         total: 0,
         messages: {}
     }
+    nil
 
 hook.Add "PlayerAuthed", "Section580_SetupPlayer", setupPlayer
 
 teardownPlayer = (_, steamId) ->
     return unless steamId
     rawset netSpam, steamId, nil
+    nil
 
 gameevent.Listen "player_disconnect"
 hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
@@ -145,7 +147,7 @@ net.Incoming = ( len, client ) ->
         plyIP = client\IPAddress!
         isAdmin = client\IsAdmin!
 
-    unless isAdmin
+    if isAdmin == false
         shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
         return if shouldIgnore
 
