@@ -47,7 +47,7 @@ setupPlayer = (_, steamId) ->
     }
     return nil
 
-hook.Add "PlayerAuthed", "Section580_SetupPlayer", setupPlayer
+hook.Add "NetworkIDValidated", "Section580_SetupPlayer", setupPlayer
 
 teardownPlayer = (_, steamId) ->
     return unless steamId
@@ -78,9 +78,12 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
 -- Returns whether to ignore the message
 tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     return if rawget safeNetMessages, message
+    return if IsValid(ply) and ply\IsAdmin!
 
     plyInfo = rawget netSpam, plySteamId
-    return true unless plyInfo
+    if not plyInfo
+        warnLog "Ignoring message because we're not tracking the given steamID! [#{message}], [#{ply}], [#{plySteamId}], [#{plyNick}], [#{plyIP}]", true
+        return true
 
     messages = rawget plyInfo, "messages"
     totalCount = rawget plyInfo, "total"
