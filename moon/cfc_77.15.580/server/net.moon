@@ -45,21 +45,20 @@ setupPlayer = (_, steamId) ->
         total: 0,
         messages: {}
     }
-    nil
+    return nil
 
 hook.Add "PlayerAuthed", "Section580_SetupPlayer", setupPlayer
 
 teardownPlayer = (_, steamId) ->
     return unless steamId
     rawset netSpam, steamId, nil
-    nil
+    return nil
 
 gameevent.Listen "player_disconnect"
 hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
 
 bootPlayer = ( ply ) ->
     kickReason = "Suspected malicious action"
-
     return unless netShouldBan
     return unless IsValid ply
     return if ply\IsAdmin!
@@ -78,7 +77,6 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
 
 -- Returns whether to ignore the message
 tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
-    return if IsValid(ply) and ply\IsAdmin!
     return if rawget safeNetMessages, message
 
     plyInfo = rawget netSpam, plySteamId
