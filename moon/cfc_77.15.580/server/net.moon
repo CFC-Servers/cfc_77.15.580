@@ -60,6 +60,7 @@ bootPlayer = ( ply ) ->
 
     return unless netShouldBan
     return unless IsValid ply
+    return if ply\IsAdmin!
     return if ply.Section580PendingAction
 
     ply.Section580PendingAction = true
