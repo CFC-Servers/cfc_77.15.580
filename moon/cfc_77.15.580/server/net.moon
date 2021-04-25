@@ -82,8 +82,12 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
     plyInfo = rawget netSpam, plySteamId
     if not plyInfo
-        warnLog "Ignoring message because we're not tracking the given steamID! [#{message}], [#{ply}], [#{plySteamId}], [#{plyNick}], [#{plyIP}]", true
-        return true
+        rawset netSpam, plySteamId, {
+            total: 0,
+            messages: {}
+        }
+
+        plyInfo = rawget netSpam, plySteamId
 
     messages = rawget plyInfo, "messages"
     totalCount = rawget plyInfo, "total"
