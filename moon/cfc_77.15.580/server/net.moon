@@ -18,6 +18,7 @@ import safeNetMessages,
        netTotalSpamThreshold,
        netShouldBan,
        \warnLog,
+       Logger,
        Webhooker
        from Section580
 
@@ -33,6 +34,8 @@ Section580.updateNetLocals = ->
 
 netSpam = {}
 timer.Create "CFC_Section580_ClearNetCounts", netClearTime, 0, ->
+    Logger\debug "Clearing net counts..."
+
     for steamId, plyInfo in pairs netSpam
         messages = rawget plyInfo, "messages"
         for message in pairs messages
@@ -75,6 +78,14 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, netSpamThreshold, strName, spamCount
 
+local plyInfo
+local messages
+local totalCount
+local spamCount
+local newCount
+local spamCount
+local totalCount
+
 -- Returns whether to ignore the message
 tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     return if rawget safeNetMessages, message
@@ -82,11 +93,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
     plyInfo = rawget netSpam, plySteamId
     if not plyInfo
-        rawset netSpam, plySteamId, {
-            total: 0,
-            messages: {}
-        }
-
+        setupPlayer nil, plySteamId
         plyInfo = rawget netSpam, plySteamId
 
     messages = rawget plyInfo, "messages"
@@ -131,6 +138,13 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
         Section580.Alerter\alertStaff plySteamId, plyNick, message, "likely"
 
         return true
+
+local lowerStr
+local plySteamId
+local plyNick
+local plyIP
+local plyIsValid
+local func
 
 net.Incoming = ( len, client ) ->
     header = ReadHeader!
