@@ -2,7 +2,6 @@ import ReadHeader from net
 import NetworkIDToString from util
 import lower from string
 
-rawget = rawget
 pcall = pcall
 rawget = rawget
 rawset = rawset
