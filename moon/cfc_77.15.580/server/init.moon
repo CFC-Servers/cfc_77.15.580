@@ -11,14 +11,14 @@ netSpamThreshold = CreateConVar "#{prefix}_net_spam_threshold", 1, protected, "N
 netTotalSpamThreshold = CreateConVar "#{prefix}_total_net_spam_threshold", 1, protected, "Net spam threshold per clear time for all messages", 1
 netExtremeSpamThreshold = CreateConVar "#{prefix}_extreme_net_spam_threshold", 1, protected, "Extreme net spam threshold per clear time for a single message (triggers reactions like bans/kicks)", 1
 netExtremeSpamBanLength = CreateConVar "#{prefix}_extreme_net_spam_ban_length", 1, protected, "If enabled, how long to ban clients who trigger the extreme net spam threshold", 1
-netShouldBan = CreateConVar "#{prefix}_should_ban", 1, protected, "Whether or not to ban a client for triggering extreme net spam thresholds", 0, 1
+netShouldBan = CreateConVar "#{prefix}_net_should_ban", 1, protected, "Whether or not to ban a client for triggering extreme net spam thresholds", 0, 1
 
 commandClearTime = CreateConVar "#{prefix}_command_clear_time", 1, protected, "How often to reset command spam budget", 0
 commandSpamThreshold = CreateConVar "#{prefix}_command_spam_threshold", 1, protected, "Command spam threshold per clear time for a single message", 1
 commandTotalSpamThreshold = CreateConVar "#{prefix}_total_command_spam_threshold", 1, protected, "Command spam threshold per clear time for all messages", 1
 commandExtremeSpamThreshold = CreateConVar "#{prefix}_extreme_command_spam_threshold", 1, protected, "Extreme command spam threshold per clear time for a single message (triggers reactions like bans/kicks)", 1
 commandExtremeSpamBanLength = CreateConVar "#{prefix}_extreme_command_spam_ban_length", 1, protected, "If enabled, how long to ban clients who trigger the extreme net spam threshold", 1
-commandShouldBan = CreateConVar "#{prefix}_should_ban", 1, protected, "Whether or not to ban a client for triggering extreme command spam thresholds", 0, 1
+commandShouldBan = CreateConVar "#{prefix}_command_should_ban", 1, protected, "Whether or not to ban a client for triggering extreme command spam thresholds", 0, 1
 
 export Section580 = {
     -- Net spam
