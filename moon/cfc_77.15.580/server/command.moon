@@ -5,6 +5,7 @@ rawget = rawget
 rawset = rawset
 pairs = pairs
 IsValid = IsValid
+concmdRun = concommand.Run
 
 export Section580
 import safeCommands,
@@ -31,6 +32,8 @@ Section580.updateCommandLocals = ->
            from Section580
 
 commandSpam = {}
+Section580.getCommandSpam = () -> commandSpam
+
 timer.Create "CFC_Section580_ClearCommandCounts", commandClearTime, 0, ->
     for steamId, plyInfo in pairs commandSpam
         commands = rawget plyInfo, "commands"
@@ -60,7 +63,7 @@ bootPlayer = ( ply ) ->
     kickReason = "Suspected malicious action"
     return unless commandShouldBan
     return unless IsValid ply
-    return if ply\IsAdmin!
+    --return if ply\IsAdmin!
     return if ply.Section580PendingAction
 
     ply.Section580PendingAction = true
@@ -74,19 +77,35 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, commandSpamThreshold, strName, spamCount
 
--- Returns whether to ignore the command
-tallyUsage = ( command, ply, plySteamId, plyNick, plyIP ) ->
-    return if rawget safeCommands, command
-    return if IsValid(ply) and ply\IsAdmin!
+extremeSpamResponse = (plyNick, plySteamId, command, spamCount) ->
+    alertMessage = "Player spamming a command! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
+    warnLog alertMessage, true
 
-    plyInfo = rawget commandSpam, plySteamId
+    sendAlert plySteamId, plyNick, plyIP, command, spamCount, "extreme"
+    bootPlayer ply
+
+totalSpamResponse = (plyNick, plySteamId, totalCount) ->
+    alertMessage = "Player spamming large number of commands! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
+    warnLog alertMessage, true
+
+    sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
+    bootPlayer ply
+
+likelySpamResponse = (plyNick, plySteamId, spamCount) ->
+    alertMessage = "Player likely spamming commands! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
+    warnLog alertMessage
+    Section580.Alerter\alertStaff plySteamId, plyNick, command, "likely"
+
+
+calculateCounts = (steamId, command) ->
+    plyInfo = rawget commandSpam, steamId
     if not plyInfo
-        rawset commandSpam, plySteamId, {
+        rawset commandSpam, steamId, {
             total: 0,
             commands: {}
         }
 
-        plyInfo = rawget commandSpam, plySteamId
+        plyInfo = rawget commandSpam, steamId
 
     commands = rawget plyInfo, "commands"
     totalCount = rawget plyInfo, "total"
@@ -102,57 +121,40 @@ tallyUsage = ( command, ply, plySteamId, plyNick, plyIP ) ->
     totalCount = totalCount + 1
     rawset plyInfo, "total", totalCount
 
+    return spamCount, totalCount
+
+-- Returns whether to ignore the command
+shouldIgnore = (ply, command) ->
+    command = lower command
+    return if rawget safeCommands, command
+    return unless IsValid ply
+    --return if ply\IsAdmin!
+
+    plySteamId = ply\SteamID!
+    plyNick = ply\Nick!
+    plyIP = ply\IPAddress!
+
+    spamCount, totalCount = calculateCounts plySteamId, command
+    print command, plySteamId, spamCount, totalCount
+
     -- Extreme spam for specific command
     if spamCount > commandExtremeSpamThreshold
-        alertMessage = "Player spamming a command! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
-        warnLog alertMessage, true
-
-        sendAlert plySteamId, plyNick, plyIP, command, spamCount, "extreme"
-        bootPlayer ply
-
+        extremeSpamResponse plyNick, plySteamId, command, spamCount
         return true
 
     -- Extreme spam for all commands
     if totalCount > commandTotalSpamThreshold
-        alertMessage = "Player spamming large number of commands! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
-        warnLog alertMessage, true
-        PrintTable commands
-
-        sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
-        bootPlayer ply
-
+        totalSpamResponse plyNick, plySteamId, totalCount
         return true
 
     -- Likely spam for specific command
     if spamCount > commandSpamThreshold
-        alertMessage = "Player likely spamming commands! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
-        warnLog alertMessage
-        Section580.Alerter\alertStaff plySteamId, plyNick, command, "likely"
-
+        likelySpamResponse plyNick, plySteamId, spamCount
         return true
 
-concommand.Run = ( client, command, arguments, args ) ->
-    lowerCommand = command and lower command
+    false
 
-    return unless lowerCommand
+concommand.Run = ( ... ) ->
+    return if shouldIgnore ...
 
-    plySteamId = "<Unknown Steam ID>"
-    plyNick = "<Unknown Player Name>"
-    plyIP = "<Unknown Player IP>"
-    plyIsValid = IsValid client
-
-    if plyIsValid
-        plySteamId = client\SteamID!
-        plyNick = client\Nick!
-        plyIP = client\IPAddress!
-
-    shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
-    return if shouldIgnore
-
-    func = rawget CommandList, lowerCommand
-
-    if not func
-        warnLog "Command with no receivers sent by #{plyNick} (#{plySteamId})!: '#{lowerCommand}'"
-        return
-
-    func client, command, arguments, args
+    concmdRun ...
