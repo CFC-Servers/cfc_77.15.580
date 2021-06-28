@@ -63,7 +63,7 @@ bootPlayer = ( ply ) ->
     kickReason = "Suspected malicious action"
     return unless commandShouldBan
     return unless IsValid ply
-    --return if ply\IsAdmin!
+    return if ply\IsAdmin!
     return if ply.Section580PendingAction
 
     ply.Section580PendingAction = true
@@ -128,14 +128,13 @@ shouldIgnore = (ply, command) ->
     command = lower command
     return if rawget safeCommands, command
     return unless IsValid ply
-    --return if ply\IsAdmin!
+    return if ply\IsAdmin!
 
     plySteamId = ply\SteamID!
     plyNick = ply\Nick!
     plyIP = ply\IPAddress!
 
     spamCount, totalCount = calculateCounts plySteamId, command
-    print command, plySteamId, spamCount, totalCount
 
     -- Extreme spam for specific command
     if spamCount > commandExtremeSpamThreshold
