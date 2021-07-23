@@ -24,6 +24,7 @@ export Section580 = {
     safeNetMessages:
         simfphys_mousesteer: true -- Called on "StartCommand", sets mousesteer value serverside
         sf_netmessage: true -- Starfall has its own limitations in place, so this should be safe
+        pac_projectile_remove_all: -- Gets pretty spammy for some PACs, doesn't seem to be an exploit opportunity
 
     -- Connect spam
     connectClearTime: 3 -- In seconds
