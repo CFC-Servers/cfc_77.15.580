@@ -1,7 +1,7 @@
-require "cfclogger"
+require "logger"
 
 CurTime = CurTime
-Logger = CFCLogger "CFC Section580"
+Logger = Logger "CFC Section580"
 
 prefix = "cfc_section580"
 protected = FCVAR_PROTECTED
