@@ -1,0 +1,11 @@
+name: Lint Moonscript
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: CFC-Servers/github_action_workflows/lint_moonscript@feature/composite
