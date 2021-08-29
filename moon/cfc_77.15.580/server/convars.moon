@@ -6,6 +6,9 @@ INT = "int" -- Default
 BOOL = "bool"
 FLOAT = "float"
 
+defaults =
+    type: INT
+
 convars = {
     net_clear_time:
         type: FLOAT
@@ -58,10 +61,8 @@ convarLookup = {}
 defaultDefault = 1
 
 for name, data in pairs convars
-    local type
-
+    :type = defaults
     :type, :help, :min, :max = data
-    type or= INT
     fullName = "#{prefix}_#{name}"
 
     convar = CreateConVar fullName, defaultDefault, protected, help, min, max
