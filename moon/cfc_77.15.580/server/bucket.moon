@@ -13,11 +13,10 @@ class Section580.Bucket
     _updateCount: =>
         if @count < @max
             sinceLast = TickCount! - @lastUpdate
-            filledSinceLast = ( floor sinceLast / @interval ) * @amount
+            filledSinceLast = (floor sinceLast / @interval) * @amount
 
             @count += filledSinceLast
-            if @count > @max
-                @count = @max
+            @count = @max if @count > @max
 
         @lastUpdate = TickCount!
 
