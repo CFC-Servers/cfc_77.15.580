@@ -1,7 +1,7 @@
 require "webhooker_interface"
-util.AddNetworkString "AlertNetAbuse"
+import SysTime, IsValid, rawget, PrintTable from _G
 
-SysTime = SysTime
+util.AddNetworkString "AlertNetAbuse"
 Webhooker = WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
 
 RED = Color 255, 0, 0
