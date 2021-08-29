@@ -86,7 +86,7 @@ totalSpamResponse = (ply, plyNick, plySteamId, plyIP, totalCount) ->
     alertMessage = "Player spamming large number of commands! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
     warnLog alertMessage, true
 
-    sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
+    sendAlert plySteamId, plyNick, plyIP, nil, totalCount, "extreme"
     bootPlayer ply
 
 likelySpamResponse = (plyNick, plySteamId, command, spamCount) ->
