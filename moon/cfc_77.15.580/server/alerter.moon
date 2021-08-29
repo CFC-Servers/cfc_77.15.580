@@ -1,7 +1,7 @@
 require "webhooker_interface"
-util.AddNetworkString "AlertNetAbuse"
+import SysTime, IsValid, rawget, PrintTable from _G
 
-SysTime = SysTime
+util.AddNetworkString "AlertNetAbuse"
 Webhooker = WebhookerInterface and WebhookerInterface! or { send: () -> "noop" }
 
 RED = Color 255, 0, 0
@@ -11,11 +11,11 @@ class Alerter
     new: =>
         @shouldWebhook = false
         @shouldAlert =
-            "moderator": true
-            "developer": true
-            "admin": true
-            "superadmin": true
-            "owner": true
+            moderator: true
+            developer: true
+            admin: true
+            superadmin: true
+            owner: true
 
         @staffAlertDelay = 5 -- How many seconds between staff alerts
         @lastStaffAlerts = {} -- Per steamid

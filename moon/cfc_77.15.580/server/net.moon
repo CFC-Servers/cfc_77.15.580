@@ -1,33 +1,32 @@
 import ReadHeader from net
 import NetworkIDToString from util
 import lower from string
-
-pcall = pcall
-rawget = rawget
-rawset = rawset
-pairs = pairs
-IsValid = IsValid
+import pcall, rawget, rawset, pairs, IsValid from _G
 
 export Section580
-import safeNetMessages,
-       flaggedMessages,
+import netWhitelist,
+       netBlacklist,
+       netThrottles,
        netClearTime,
        netSpamThreshold,
        netExtremeSpamThreshold,
        netTotalSpamThreshold,
        netShouldBan,
-       \warnLog,
-       Webhooker
+       Bucket,
+       \warnLog
        from Section580
 
 Section580.updateNetLocals = ->
-    import safeNetMessages,
-           flaggedMessages,
+    import netWhitelist,
+           netBlacklist,
+           netThrottles,
            netClearTime,
            netSpamThreshold,
            netExtremeSpamThreshold,
            netTotalSpamThreshold,
-           netShouldBan
+           netShouldBan,
+           Bucket,
+           \warnLog
            from Section580
 
 netSpam = {}
@@ -39,22 +38,43 @@ timer.Create "CFC_Section580_ClearNetCounts", netClearTime, 0, ->
 
         rawset plyInfo, "total", 0
 
+plyThrottle = {}
+setupThrottles = (steamId) ->
+    for message, throttleData in pairs netThrottles
+        local newBucket
+        :delay, :bucket = throttleData
+
+        if bucket then
+            :max, :refill = bucket
+            :interval, :amount = refill
+
+            newBucket = Bucket max, interval, amount
+
+        if delay
+            newBucket = Bucket 1, delay, 1
+
+        rawset plyThrottle, steamId, newBucket
+
 setupPlayer = (_, steamId) ->
     rawset netSpam, steamId, {
         total: 0,
         messages: {}
     }
+
+    setupThrottles steamId
+
     return nil
 
-hook.Add "NetworkIDValidated", "Section580_SetupPlayer", setupPlayer
+hook.Add "NetworkIDValidated", "Section580_SetupPlayerNet", setupPlayer
 
 teardownPlayer = (_, steamId) ->
     return unless steamId
     rawset netSpam, steamId, nil
+    rawset plyThrottle, steamId, nil
     return nil
 
 gameevent.Listen "player_disconnect"
-hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
+hook.Add "player_disconnect", "Section580_TeardownPlayerNet", teardownPlayer
 
 bootPlayer = ( ply ) ->
     kickReason = "Suspected malicious action"
@@ -76,9 +96,20 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
 
 -- Returns whether to ignore the message
 tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
-    return if rawget safeNetMessages, message
+    return if rawget netWhitelist, message
     return if IsValid(ply) and ply\IsAdmin!
+    return true if rawget netBlacklist, message
 
+    if rawget netThrottles, message
+        bucket = rawget(rawget(plyThrottle, plySteamId), message)
+        if bucket\Send! == false
+            alertMessage = "Throttling message from player: '#{message}' from '#{plySteamId}'"
+            warnLog alertMessage
+            return true
+
+        return false
+
+    -- Manage current count
     plyInfo = rawget netSpam, plySteamId
     if not plyInfo
         rawset netSpam, plySteamId, {

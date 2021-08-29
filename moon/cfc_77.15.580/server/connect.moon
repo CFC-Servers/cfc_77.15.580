@@ -30,7 +30,7 @@ hook.Add "PlayerConnect", "Section580_ConnectionThrottle", (name, ip) ->
 
     if newAmount > connectSpamThreshold
         warnLog "Spam connections from IP: #{ip} - Banning: #{connectShouldBan}", true
-        return unless shouldBan
+        return unless connectShouldBan
 
         banLength = connectSpamBanLength
         RunConsoleCommand "addip", banLength, ip
