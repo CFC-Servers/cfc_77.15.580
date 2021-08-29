@@ -62,7 +62,7 @@ lookupMap =
 convarLookup = {}
 defaultDefault = 1
 
-for name, data in pairs convars
+for name, data in pairs convars do
     :type = defaults
     :type, :help, :min, :max = data
     fullName = "#{prefix}_#{name}"
