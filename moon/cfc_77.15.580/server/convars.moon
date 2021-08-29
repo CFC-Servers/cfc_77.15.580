@@ -1,3 +1,5 @@
+import AddChangeCallback from cvars
+
 -- All convars prefixed with "cfc_section580_"
 prefix = "cfc_section580"
 protected = FCVAR_PROTECTED
