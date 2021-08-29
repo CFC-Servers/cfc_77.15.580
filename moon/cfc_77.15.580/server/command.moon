@@ -15,8 +15,7 @@ import safeCommands,
        commandExtremeSpamThreshold,
        commandTotalSpamThreshold,
        commandShouldBan,
-       \warnLog,
-       Webhooker
+       \warnLog
        from Section580
 
 Section580.updateCommandLocals = ->
@@ -27,8 +26,7 @@ Section580.updateCommandLocals = ->
            commandExtremeSpamThreshold,
            commandTotalSpamThreshold,
            commandShouldBan,
-           \warnLog,
-           Webhooker
+           \warnLog
            from Section580
 
 commandSpam = {}
