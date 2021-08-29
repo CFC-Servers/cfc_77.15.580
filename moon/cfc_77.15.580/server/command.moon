@@ -75,21 +75,21 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, commandSpamThreshold, strName, spamCount
 
-extremeSpamResponse = (plyNick, plySteamId, command, spamCount) ->
+extremeSpamResponse = (ply, plyNick, plySteamId, plyIP, command, spamCount) ->
     alertMessage = "Player spamming a command! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
     warnLog alertMessage, true
 
     sendAlert plySteamId, plyNick, plyIP, command, spamCount, "extreme"
     bootPlayer ply
 
-totalSpamResponse = (plyNick, plySteamId, totalCount) ->
+totalSpamResponse = (ply, plyNick, plySteamId, plyIP, totalCount) ->
     alertMessage = "Player spamming large number of commands! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
     warnLog alertMessage, true
 
     sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
     bootPlayer ply
 
-likelySpamResponse = (plyNick, plySteamId, spamCount) ->
+likelySpamResponse = (plyNick, plySteamId, command, spamCount) ->
     alertMessage = "Player likely spamming commands! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
     warnLog alertMessage
     Section580.Alerter\alertStaff plySteamId, plyNick, command, "likely"
@@ -136,12 +136,12 @@ shouldIgnore = (ply, command) ->
 
     -- Extreme spam for specific command
     if spamCount > commandExtremeSpamThreshold
-        extremeSpamResponse plyNick, plySteamId, command, spamCount
+        extremeSpamResponse ply, plyNick, plySteamId, plyIP, command, spamCount
         return true
 
     -- Extreme spam for all commands
     if totalCount > commandTotalSpamThreshold
-        totalSpamResponse plyNick, plySteamId, totalCount
+        totalSpamResponse plyNick, plySteamId, plyIP, totalCount
         return true
 
     -- Likely spam for specific command
