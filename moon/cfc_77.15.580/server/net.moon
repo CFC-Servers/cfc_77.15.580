@@ -131,6 +131,8 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
         return true
 
+receivers = net.Receivers
+
 net.Incoming = ( len, client ) ->
     header = ReadHeader!
     strName = NetworkIDToString header
@@ -153,7 +155,7 @@ net.Incoming = ( len, client ) ->
     shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
     return if shouldIgnore
 
-    func = rawget(rawget(net, "Receivers"), lowerStr)
+    func = rawget receivers, lowerStr
 
     if not func
         warnLog "Network message with no receivers sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
