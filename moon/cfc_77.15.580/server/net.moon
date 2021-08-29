@@ -12,6 +12,7 @@ import netWhitelist,
        netExtremeSpamThreshold,
        netTotalSpamThreshold,
        netShouldBan,
+       Bucket,
        \warnLog
        from Section580
 
@@ -23,7 +24,9 @@ Section580.updateNetLocals = ->
            netSpamThreshold,
            netExtremeSpamThreshold,
            netTotalSpamThreshold,
-           netShouldBan
+           netShouldBan,
+           Bucket,
+           \warnLog
            from Section580
 
 netSpam = {}
@@ -41,7 +44,7 @@ setupThrottles = (steamId) ->
         local newBucket
         :delay, :bucket = throttleData
 
-        if bucket
+        if bucket then
             :max, :refill = bucket
             :interval, :amount = refill
 
