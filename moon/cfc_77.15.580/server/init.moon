@@ -32,6 +32,7 @@ export Section580 = {
         simfphys_mousesteer: true -- Called on "StartCommand", sets mousesteer value serverside
         sf_netmessage: true -- Starfall has its own limitations in place, so this should be safe
         pac_projectile_remove_all: true -- Gets pretty spammy for some PACs, doesn't seem to be an exploit opportunity
+        pac_entity_mutator: true -- Temporarily whitelisting until this is resolved on the develop branch
 
     -- Command spam
     commandClearTime: commandClearTime\GetFloat!
