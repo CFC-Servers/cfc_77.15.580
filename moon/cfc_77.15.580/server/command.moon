@@ -1,4 +1,5 @@
 import lower from string
+import ConsoleCommand from game
 
 pcall = pcall
 rawget = rawget
@@ -60,39 +61,40 @@ gameevent.Listen "player_disconnect"
 hook.Add "player_disconnect", "Section580_TeardownPlayerCommands", teardownPlayer
 
 kickReason = "Suspected malicious action"
-bootPlayer = ( ply, steamId, plyIP, plyNick ) ->
+boot = ( steamId, ip, nick ) ->
     return unless commandShouldBan
-    return unless IsValid ply
-    return if ply and ply.Section580PendingAction
-    ply.Section580PendingAction = true if ply
+    return if rawget pendingAction, ip
 
-    RunConsoleCommand "addip", 10, plyIP
-    ULib.addBan steamId, 10, kickReason, plyNick
+    ConsoleCommand "addip 10 #{ip}\n"
+    ULib.addBan steamId, 10, kickReason, nick
+
+    rawset pendingAction, ip, true
+    timerSimple 5, -> pendingAction[ip] = nil
 
 sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, commandSpamThreshold, strName, spamCount
 
-extremeSpamResponse = (ply, plyNick, plySteamId, plyIP, command, spamCount) ->
-    bootPlayer ply, plySteamId, plyIP, plyNick
+extremeSpamResponse = (ply, nick, steamID, ip, command, spamCount) ->
+    boot steamID, ip, nick
 
-    alertMessage = "Player spamming a command! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
+    alertMessage = "Player spamming a command! #{nick} (#{steamID}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
     warnLog alertMessage, true
 
-    sendAlert plySteamId, plyNick, plyIP, command, spamCount, "extreme"
+    sendAlert steamID, nick, ip, command, spamCount, "extreme"
 
-totalSpamResponse = (ply, plyNick, plySteamId, plyIP, totalCount) ->
-    bootPlayer ply, plySteamId, plyIP, plyNick
+totalSpamResponse = (ply, nick, steamID, ip, totalCount) ->
+    boot ply, steamID, ip, nick
 
-    alertMessage = "Player spamming large number of commands! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
+    alertMessage = "Player spamming large number of commands! #{nick} (#{steamID}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
     warnLog alertMessage, true
 
-    sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
+    sendAlert steamID, nick, ip, nil, spamCount, "extreme"
 
-likelySpamResponse = (plyNick, plySteamId, spamCount) ->
-    alertMessage = "Player likely spamming commands! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
+likelySpamResponse = (nick, steamID, spamCount) ->
+    alertMessage = "Player likely spamming commands! #{nick} (#{steamID}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
     warnLog alertMessage
-    Section580.Alerter\alertStaff plySteamId, plyNick, command, "likely"
+    Section580.Alerter\alertStaff steamID, nick, command, "likely"
 
 
 calculateCounts = (steamId, command) ->
@@ -123,33 +125,36 @@ calculateCounts = (steamId, command) ->
 
 -- Returns whether to ignore the command
 shouldIgnore = (ply, command) ->
+    return true unless IsValid ply
+
+    ip = ply\IPAddress!
+    return true if rawget pendingAction, ip
+
     command = lower command
     return if rawget safeCommands, command
-    return unless IsValid ply
     return if ply\IsAdmin!
 
-    plySteamId = ply\SteamID!
-    plyNick = ply\Nick!
-    plyIP = ply\IPAddress!
+    steamID = ply\SteamID!
+    nick = ply\Nick!
 
-    spamCount, totalCount = calculateCounts plySteamId, command
+    spamCount, totalCount = calculateCounts steamID, command
 
     -- Extreme spam for specific command
     if spamCount > commandExtremeSpamThreshold
-        extremeSpamResponse ply, plyNick, plySteamId, plyIP, command, spamCount
+        extremeSpamResponse ply, nick, steamID, ip, command, spamCount
         return true
 
     -- Extreme spam for all commands
     if totalCount > commandTotalSpamThreshold
-        totalSpamResponse ply, plyNick, plySteamId, plyIP, totalCount
+        totalSpamResponse ply, nick, steamID, ip, totalCount
         return true
 
     -- Likely spam for specific command
     if spamCount > commandSpamThreshold
-        likelySpamResponse ply, plyNick, plySteamId, plyIP, spamCount
+        likelySpamResponse ply, nick, steamID, ip, spamCount
         return true
 
-    false
+    return false
 
 concommand.Run = ( ... ) ->
     return if shouldIgnore ...

@@ -1,6 +1,7 @@
 import ReadHeader from net
 import NetworkIDToString from util
 import lower from string
+import ConsoleCommand from game
 
 pcall = pcall
 rawget = rawget
@@ -59,36 +60,36 @@ gameevent.Listen "player_disconnect"
 hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
 
 kickReason = "Suspected malicious action"
-bootPlayer = ( ply, steamId, plyIP ) ->
+boot = ( ply, steamId, ip ) ->
     return unless netShouldBan
-    return if rawget pendingAction, steamId
-    warnLog "Booting player: #{steamID} | #{plyIP}", true
+    return if rawget pendingAction, ip
 
-    rawset pendingAction, steamId, true
+    ConsoleCommand "addip 10 #{ip}\n"
+    warnLog "Booted player: SteamID: #{steamID} | IP: #{ip}", true
 
-    RunConsoleCommand "addip", 10, plyIP
     ULib.addBan steamId, 10, kickReason
 
-    timerSimple 5, -> rawset pendingAction, steamId, nil
+    rawset pendingAction, ip, true
+    timerSimple 5, -> rawset pendingAction[ip] = nil
 
 sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, netSpamThreshold, strName, spamCount
 
 -- Returns whether to ignore the message
-tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
-    return true if rawget pendingAction, plySteamId
+tallyUsage = ( message, ply, steamID, nick, ip ) ->
+    return true if rawget pendingAction, ip
     return if rawget safeNetMessages, message
     -- return if IsValid(ply) and ply\IsAdmin!
 
-    plyInfo = rawget netSpam, plySteamId
+    plyInfo = rawget netSpam, steamID
     if not plyInfo
-        rawset netSpam, plySteamId, {
+        rawset netSpam, steamID, {
             total: 0,
             messages: {}
         }
 
-        plyInfo = rawget netSpam, plySteamId
+        plyInfo = rawget netSpam, steamID
 
     messages = rawget plyInfo, "messages"
     totalCount = rawget plyInfo, "total"
@@ -106,64 +107,59 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
     -- Extreme spam for specific message
     if spamCount > netExtremeSpamThreshold
-        bootPlayer ply, plySteamId, plyIP
+        boot ply, steamID, ip
 
-        alertMessage = "Player spamming a network message! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
+        alertMessage = "Player spamming a network message! #{nick} (#{steamID}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
 
-        sendAlert plySteamId, plyNick, plyIP, message, spamCount, "extreme"
+        sendAlert steamID, nick, ip, message, spamCount, "extreme"
 
         return true
 
     -- Extreme spam for all messages
     if totalCount > netTotalSpamThreshold
-        bootPlayer ply, plySteamId, plyIP
+        boot ply, steamID, ip
 
-        alertMessage = "Player spamming large number of network messages! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
+        alertMessage = "Player spamming large number of network messages! #{nick} (#{steamID}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
         warnLog alertMessage
         PrintTable messages
 
-        sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
+        sendAlert steamID, nick, ip, nil, spamCount, "extreme"
 
         return true
 
     -- Likely spam for specific message
     if spamCount > netSpamThreshold
-        alertMessage = "Player likely spamming network messages! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
+        alertMessage = "Player likely spamming network messages! #{nick} (#{steamID}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
-        Section580.Alerter\alertStaff plySteamId, plyNick, message, "likely"
+        Section580.Alerter\alertStaff steamID, nick, message, "likely"
 
         return true
 
 net.Incoming = ( len, client ) ->
-    header = ReadHeader!
-    strName = NetworkIDToString header
-
-    return unless strName
-    if strName == "nil"
-        warnLog "Invalid network message sent by '#{client}': Header: '#{header}' | strName: '#{strName}' | len: '#{len}'"
-
-    lowerStr = lower strName
-    plySteamId = "<Unknown Steam ID>"
-    plyNick = "<Unknown Player Name>"
-    plyIP = "<Unknown Player IP>"
-    plyIsValid = IsValid client
-
-    if plyIsValid
-        plySteamId = client\SteamID!
-        plyNick = client\Nick!
-        plyIP = client\IPAddress!
-    else
-        warnLog "Received net message from an invalid player! Discarding. #{lowerStr}, #{client}"
+    if not IsValid client
+        warnLog "Received net message from an invalid player! Discarding. #{client}", true
         return
 
-    shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
+    header = ReadHeader!
+    messageName = NetworkIDToString header
+
+    return unless messageName
+    if messageName == "nil"
+        warnLog "Invalid network message sent by '#{client}': Header: '#{header}' | messageName: '#{messageName}' | len: '#{len}'"
+
+    lowerName = lower messageName
+    steamID = client\SteamID!
+    nick = client\Nick!
+    ip = client\IPAddress!
+
+    shouldIgnore = tallyUsage lowerName, client, steamID, nick, ip
     return if shouldIgnore
 
-    func = rawget(rawget(net, "Receivers"), lowerStr)
+    func = rawget(rawget(net, "Receivers"), lowerName)
 
     if not func
-        warnLog "Network message with no receivers sent by #{plyNick} (#{plySteamId})!: '#{strName}'"
+        warnLog "Network message with no receivers sent by #{nick} (#{steamID})!: '#{messageName}'"
         return
 
     len -= 16
