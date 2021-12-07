@@ -56,19 +56,14 @@ teardownPlayer = (_, steamId) ->
 gameevent.Listen "player_disconnect"
 hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
 
-bootPlayer = ( ply ) ->
-    kickReason = "Suspected malicious action"
+kickReason = "Suspected malicious action"
+bootPlayer = ( ply, steamId, plyIP ) ->
     return unless netShouldBan
-    return unless IsValid ply
-    return if ply\IsAdmin!
-    return if ply.Section580PendingAction
+    return if ply and ply.Section580PendingAction
+    ply.Section580PendingAction = true if ply
 
-    ply.Section580PendingAction = true
-
-    if ULib
-        ULib.ban ply, 1, kickReason
-    else
-        ply\Kick kickReason
+    RunConsoleCommand "addip", 10, plyIP
+    ULib.addBan steamId, 10, kickReason
 
 sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
@@ -104,22 +99,24 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
 
     -- Extreme spam for specific message
     if spamCount > netExtremeSpamThreshold
+        bootPlayer ply, plySteamId, plyIP
+
         alertMessage = "Player spamming a network message! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage, true
 
         sendAlert plySteamId, plyNick, plyIP, message, spamCount, "extreme"
-        bootPlayer ply
 
         return true
 
     -- Extreme spam for all messages
     if totalCount > netTotalSpamThreshold
+        bootPlayer ply, plySteamId, plyIP
+
         alertMessage = "Player spamming large number of network messages! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
         warnLog alertMessage, true
         PrintTable messages
 
         sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
-        bootPlayer ply
 
         return true
 

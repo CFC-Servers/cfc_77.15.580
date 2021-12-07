@@ -59,37 +59,35 @@ teardownPlayer = (_, steamId) ->
 gameevent.Listen "player_disconnect"
 hook.Add "player_disconnect", "Section580_TeardownPlayerCommands", teardownPlayer
 
-bootPlayer = ( ply ) ->
-    kickReason = "Suspected malicious action"
+kickReason = "Suspected malicious action"
+bootPlayer = ( ply, steamId, plyIP, plyNick ) ->
     return unless commandShouldBan
     return unless IsValid ply
-    return if ply\IsAdmin!
-    return if ply.Section580PendingAction
+    return if ply and ply.Section580PendingAction
+    ply.Section580PendingAction = true if ply
 
-    ply.Section580PendingAction = true
-
-    if ULib
-        ULib.ban ply, 1, kickReason
-    else
-        ply\Kick kickReason
+    RunConsoleCommand "addip", 10, plyIP
+    ULib.addBan steamId, 10, kickReason, plyNick
 
 sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
     Section580.Alerter\alertDiscord steamId, nick, ip, commandSpamThreshold, strName, spamCount
 
-extremeSpamResponse = (plyNick, plySteamId, command, spamCount) ->
+extremeSpamResponse = (ply, plyNick, plySteamId, plyIP, command, spamCount) ->
+    bootPlayer ply, plySteamId, plyIP, plyNick
+
     alertMessage = "Player spamming a command! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
     warnLog alertMessage, true
 
     sendAlert plySteamId, plyNick, plyIP, command, spamCount, "extreme"
-    bootPlayer ply
 
-totalSpamResponse = (plyNick, plySteamId, totalCount) ->
+totalSpamResponse = (ply, plyNick, plySteamId, plyIP, totalCount) ->
+    bootPlayer ply, plySteamId, plyIP, plyNick
+
     alertMessage = "Player spamming large number of commands! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
     warnLog alertMessage, true
 
     sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
-    bootPlayer ply
 
 likelySpamResponse = (plyNick, plySteamId, spamCount) ->
     alertMessage = "Player likely spamming commands! #{plyNick} (#{plySteamId}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
@@ -138,17 +136,17 @@ shouldIgnore = (ply, command) ->
 
     -- Extreme spam for specific command
     if spamCount > commandExtremeSpamThreshold
-        extremeSpamResponse plyNick, plySteamId, command, spamCount
+        extremeSpamResponse ply, plyNick, plySteamId, plyIP, command, spamCount
         return true
 
     -- Extreme spam for all commands
     if totalCount > commandTotalSpamThreshold
-        totalSpamResponse plyNick, plySteamId, totalCount
+        totalSpamResponse ply, plyNick, plySteamId, plyIP, totalCount
         return true
 
     -- Likely spam for specific command
     if spamCount > commandSpamThreshold
-        likelySpamResponse plyNick, plySteamId, spamCount
+        likelySpamResponse ply, plyNick, plySteamId, plyIP, spamCount
         return true
 
     false
