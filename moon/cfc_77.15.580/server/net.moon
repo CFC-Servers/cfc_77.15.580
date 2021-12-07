@@ -2,6 +2,7 @@ import ReadHeader from net
 import NetworkIDToString from util
 import lower from string
 import ConsoleCommand from game
+import Left, find from string
 
 pcall = pcall
 rawget = rawget
@@ -64,7 +65,10 @@ boot = ( ply, steamId, ip ) ->
     return unless netShouldBan
     return if rawget pendingAction, ip
 
-    ConsoleCommand "addip 10 #{ip}\n"
+    -- Removes port number
+    cleanIP = Left ip, find ip, ":", 7, true
+
+    ConsoleCommand "addip 10 #{cleanIP}\n"
     warnLog "Booted player: SteamID: #{steamID} | IP: #{ip}", true
 
     ULib.addBan steamId, 10, kickReason
