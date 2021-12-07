@@ -1,5 +1,6 @@
 import lower from string
 import ConsoleCommand from game
+import Left, find from string
 
 pcall = pcall
 rawget = rawget
@@ -67,8 +68,11 @@ boot = ( steamId, ip, nick ) ->
     return unless commandShouldBan
     return if rawget pendingAction, ip
 
-    ConsoleCommand "addip 10 #{ip}\n"
-    ULib.addBan steamId, 10, kickReason, nick
+    -- Removes port number
+    cleanIP = Left ip, find(ip, ":", 7, true) - 1
+
+    ConsoleCommand "addip 10 #{cleanIP};writeip\n"
+    timerSimple 1, -> ULib.addBan steamId, 10, kickReason, nick
 
     rawset pendingAction, ip, true
     timerSimple 5, -> pendingAction[ip] = nil
