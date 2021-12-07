@@ -72,7 +72,7 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
 -- Returns whether to ignore the message
 tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
     return if rawget safeNetMessages, message
-    return if IsValid(ply) and ply\IsAdmin!
+    -- return if IsValid(ply) and ply\IsAdmin!
 
     plyInfo = rawget netSpam, plySteamId
     if not plyInfo
