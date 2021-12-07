@@ -1,3 +1,5 @@
+import ConsoleCommand from game
+
 export Section580
 import
     connectClearTime,
@@ -28,9 +30,9 @@ hook.Add "PlayerConnect", "Section580_ConnectionThrottle", (name, ip) ->
 
     rawset connectSpam, ip, newAmount
 
-    if newAmount > connectSpamThreshold
-        warnLog "Spam connections from IP: #{ip} - Banning: #{connectShouldBan}", true
-        return unless shouldBan
+    return unless newAmount > connectSpamThreshold
+    return unless shouldBan
 
-        banLength = connectSpamBanLength
-        RunConsoleCommand "addip", banLength, ip
+    ConsoleCommand "addip #{connectSpamBanLength} #{ip}\n"
+
+    warnLog "Spam connections from IP: #{ip} - Banning: #{connectShouldBan}", true
