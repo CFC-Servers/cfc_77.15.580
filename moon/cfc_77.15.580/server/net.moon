@@ -7,6 +7,7 @@ rawget = rawget
 rawset = rawset
 pairs = pairs
 IsValid = IsValid
+timerSimple = timer.Simple
 
 export Section580
 import safeNetMessages,
@@ -30,6 +31,7 @@ Section580.updateNetLocals = ->
            netShouldBan
            from Section580
 
+pendingAction = {}
 netSpam = {}
 timer.Create "CFC_Section580_ClearNetCounts", netClearTime, 0, ->
     for steamId, plyInfo in pairs netSpam
@@ -59,11 +61,15 @@ hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
 kickReason = "Suspected malicious action"
 bootPlayer = ( ply, steamId, plyIP ) ->
     return unless netShouldBan
-    return if ply and ply.Section580PendingAction
-    ply.Section580PendingAction = true if ply
+    return if rawget pendingAction, steamId
+    warnLog "Booting player: #{steamID} | #{plyIP}", true
+
+    rawset pendingAction, steamId, true
 
     RunConsoleCommand "addip", 10, plyIP
     ULib.addBan steamId, 10, kickReason
+
+    timerSimple 5, -> rawset pendingAction, steamId, nil
 
 sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
@@ -71,6 +77,7 @@ sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
 
 -- Returns whether to ignore the message
 tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
+    return true if rawget pendingAction, plySteamId
     return if rawget safeNetMessages, message
     -- return if IsValid(ply) and ply\IsAdmin!
 
@@ -146,6 +153,9 @@ net.Incoming = ( len, client ) ->
         plySteamId = client\SteamID!
         plyNick = client\Nick!
         plyIP = client\IPAddress!
+    else
+        warnLog "Received net message from an invalid player! Discarding. #{lowerStr}, #{client}"
+        return
 
     shouldIgnore = tallyUsage lowerStr, client, plySteamId, plyNick, plyIP
     return if shouldIgnore
