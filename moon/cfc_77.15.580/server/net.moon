@@ -70,7 +70,7 @@ boot = ( ply, steamId, ip ) ->
     ULib.addBan steamId, 10, kickReason
 
     rawset pendingAction, ip, true
-    timerSimple 5, -> rawset pendingAction[ip] = nil
+    timerSimple 5, -> pendingAction[ip] = nil
 
 sendAlert = (steamId, nick, ip, strName, spamCount, severity) ->
     Section580.Alerter\alertStaff steamId, nick, strName, severity
