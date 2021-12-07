@@ -33,6 +33,7 @@ Section580.updateCommandLocals = ->
            Webhooker
            from Section580
 
+pendingAction = {}
 commandSpam = {}
 Section580.getCommandSpam = () -> commandSpam
 
