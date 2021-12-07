@@ -6,6 +6,7 @@ rawget = rawget
 rawset = rawset
 pairs = pairs
 IsValid = IsValid
+timerSimple = timer.Simple
 concmdRun = concommand.Run
 
 export Section580
