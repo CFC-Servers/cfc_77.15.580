@@ -68,7 +68,10 @@ boot = ( ply, steamId, ip ) ->
     -- Removes port number
     cleanIP = Left ip, find ip, ":", 7, true
 
-    ConsoleCommand "addip 10 #{cleanIP}\n"
+    cmd = "addip 10 #{cleanIP};writeip\n"
+    print cmd
+    ConsoleCommand cmd
+
     warnLog "Booted player: SteamID: #{steamID} | IP: #{ip}", true
 
     ULib.addBan steamId, 10, kickReason
