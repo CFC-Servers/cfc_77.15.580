@@ -66,7 +66,7 @@ boot = ( ply, steamId, ip ) ->
     return if rawget pendingAction, ip
 
     -- Removes port number
-    cleanIP = Left ip, find ip, ":", 7, true
+    cleanIP = Left ip, find(ip, ":", 7, true) - 1
 
     cmd = "addip 10 #{cleanIP};writeip\n"
     print cmd
