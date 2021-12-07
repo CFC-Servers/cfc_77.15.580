@@ -102,7 +102,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
         bootPlayer ply, plySteamId, plyIP
 
         alertMessage = "Player spamming a network message! #{plyNick} (#{plySteamId}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
-        warnLog alertMessage, true
+        warnLog alertMessage
 
         sendAlert plySteamId, plyNick, plyIP, message, spamCount, "extreme"
 
@@ -113,7 +113,7 @@ tallyUsage = ( message, ply, plySteamId, plyNick, plyIP ) ->
         bootPlayer ply, plySteamId, plyIP
 
         alertMessage = "Player spamming large number of network messages! #{plyNick} (#{plySteamId}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
-        warnLog alertMessage, true
+        warnLog alertMessage
         PrintTable messages
 
         sendAlert plySteamId, plyNick, plyIP, nil, spamCount, "extreme"
