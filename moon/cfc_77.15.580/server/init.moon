@@ -69,7 +69,7 @@ export Section580 = {
         @updateCommandLocals!
         @updateConnectLocals!
 
-    warnLogDelay: 0.25 -- In seconds, mandatory delay between logs
+    warnLogDelay: engine.TickInterval! * 3 -- In seconds, mandatory delay between logs
     lastWarnLog: 0
     Logger: Logger
     warnLog: (message, forced = false) =>
