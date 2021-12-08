@@ -131,7 +131,7 @@ calculateCounts = (steamId, command) ->
 
 -- Returns whether to ignore the command
 shouldIgnore = (ply, command) ->
-    return true unless IsValid ply
+    return unless IsValid ply
 
     ip = ply\IPAddress!
     return true if rawget pendingAction, ip
