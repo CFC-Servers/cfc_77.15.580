@@ -157,7 +157,7 @@ shouldIgnore = (ply, command) ->
 
     -- Likely spam for specific command
     if spamCount > commandSpamThreshold
-        likelySpamResponse ply, nick, steamID, ip, spamCount
+        likelySpamResponse nick, steamID, spamCount
         return true
 
     return false
