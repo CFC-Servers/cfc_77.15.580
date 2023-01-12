@@ -1,5 +1,4 @@
 import rawget, rawset from _G
-import time from os
 
 export Section580
 import
@@ -18,26 +17,11 @@ Section580.updateConnectLocals = ->
         connectSpamBanLength
         from Section580
 
-bans = {}
-hook.Add "InitPostEntity", "Section580_ConnectSetup", -> bans = ULib.bans
-
 ipMap = {}
 connectSpam = {}
 timer.Create "CFC_Section580_ClearConnectCounts", connectClearTime, 0, ->
     for k in pairs connectSpam
         rawset connectSpam, k, nil
-
-banDetails = (name, steamID) ->
-    now = time!
-
-    return {
-        admin: "(Console)"
-        name: name
-        reason: "Exploiting"
-        steamID: steamID
-        time: now
-        unban: now + connectSpamBanLength
-    }
 
 tallyForPlayer = (steamID, name, ip) ->
     newAmount = 1
@@ -55,7 +39,8 @@ tallyForPlayer = (steamID, name, ip) ->
 
     RunConsoleCommand "addip", connectSpamBanLength, ip
     RunConsoleCommand "writeip"
-    rawset bans, steamID, banDetails steamID, name
+    RunConsoleCommand "ulx", "banid", steamID, connectSpamBanLength, "Suspected malicious action"
+    ULib.addBan steamID, connectSpamBanLength, "Suspected malicious action", name, "Section 580"
 
 gameevent.Listen "player_connect"
 hook.Add "player_connect", "Section580_ConnectionThrottle", (_, steamID, name, _, _, ip) ->

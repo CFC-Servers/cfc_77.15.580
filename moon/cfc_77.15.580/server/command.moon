@@ -72,7 +72,8 @@ boot = ( steamId, ip, nick ) ->
 
     RunConsoleCommand "addip", 10, cleanIP
     RunConsoleCommand "writeip"
-    timerSimple 1, -> ULib.addBan steamId, 10, kickReason, nick
+    RunConsoleCommand "ulx", "banid", steamId, 10, kickReason
+    ULib.addBan steamId, 10, kickReason, nick, "Section 580"
 
     rawset pendingAction, ip, true
     timerSimple 5, -> pendingAction[ip] = nil
@@ -90,7 +91,7 @@ extremeSpamResponse = (ply, nick, steamID, ip, command, spamCount) ->
     sendAlert steamID, nick, ip, command, spamCount, "extreme"
 
 totalSpamResponse = (ply, nick, steamID, ip, totalCount) ->
-    boot ply, steamID, ip, nick
+    boot steamID, ip, nick
 
     alertMessage = "Player spamming large number of commands! #{nick} (#{steamID}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
     warnLog alertMessage, true
