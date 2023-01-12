@@ -1,7 +1,6 @@
 import ReadHeader from net
 import NetworkIDToString from util
 import lower from string
-import ConsoleCommand from game
 import Left, find from string
 
 pcall = pcall
@@ -61,17 +60,18 @@ gameevent.Listen "player_disconnect"
 hook.Add "player_disconnect", "Section580_TeardownPlayer", teardownPlayer
 
 kickReason = "Suspected malicious action"
-boot = ( ply, steamId, ip ) ->
+boot = ( ply, steamId, nick, ip ) ->
     return unless netShouldBan
     return if rawget pendingAction, ip
 
     -- Removes port number
     cleanIP = Left ip, find(ip, ":", 7, true) - 1
 
-    ConsoleCommand "addip 10 #{cleanIP};writeip\n"
+    RunConsoleCommand "addip", 10, cleanIP
+    RunConsoleCommand "writeip"
+    RunConsoleCommand "ulx", "banid", steamId, 10, kickReason
+    ULib.addBan steamId, 10, kickReason, nick, "Section 580"
     warnLog "Booted player: SteamID: #{steamId} | IP: #{ip}", true
-
-    timerSimple 1, -> ULib.addBan steamId, 10, kickReason
 
     rawset pendingAction, ip, true
     timerSimple 5, -> pendingAction[ip] = nil
@@ -111,7 +111,7 @@ tallyUsage = ( message, ply, steamID, nick, ip ) ->
 
     -- Extreme spam for specific message
     if spamCount > netExtremeSpamThreshold
-        boot ply, steamID, ip
+        boot ply, steamID, nick, ip
 
         alertMessage = "Player spamming a network message! #{nick} (#{steamID}) is spamming: '#{message}' (Count: #{spamCount} per #{netClearTime} seconds)"
         warnLog alertMessage
@@ -122,7 +122,7 @@ tallyUsage = ( message, ply, steamID, nick, ip ) ->
 
     -- Extreme spam for all messages
     if totalCount > netTotalSpamThreshold
-        boot ply, steamID, ip
+        boot ply, steamID, nick, ip
 
         alertMessage = "Player spamming large number of network messages! #{nick} (#{steamID}) is spamming: #{totalCount} messages per #{netClearTime} seconds"
         warnLog alertMessage

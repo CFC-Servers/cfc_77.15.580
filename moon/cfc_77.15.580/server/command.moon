@@ -1,5 +1,4 @@
 import lower from string
-import ConsoleCommand from game
 import Left, find from string
 
 pcall = pcall
@@ -71,8 +70,10 @@ boot = ( steamId, ip, nick ) ->
     -- Removes port number
     cleanIP = Left ip, find(ip, ":", 7, true) - 1
 
-    ConsoleCommand "addip 10 #{cleanIP};writeip\n"
-    timerSimple 1, -> ULib.addBan steamId, 10, kickReason, nick
+    RunConsoleCommand "addip", 10, cleanIP
+    RunConsoleCommand "writeip"
+    RunConsoleCommand "ulx", "banid", steamId, 10, kickReason
+    ULib.addBan steamId, 10, kickReason, nick, "Section 580"
 
     rawset pendingAction, ip, true
     timerSimple 5, -> pendingAction[ip] = nil
@@ -90,14 +91,14 @@ extremeSpamResponse = (ply, nick, steamID, ip, command, spamCount) ->
     sendAlert steamID, nick, ip, command, spamCount, "extreme"
 
 totalSpamResponse = (ply, nick, steamID, ip, totalCount) ->
-    boot ply, steamID, ip, nick
+    boot steamID, ip, nick
 
     alertMessage = "Player spamming large number of commands! #{nick} (#{steamID}) is spamming: #{totalCount} commands per #{commandClearTime} seconds"
     warnLog alertMessage, true
 
     sendAlert steamID, nick, ip, nil, spamCount, "extreme"
 
-likelySpamResponse = (nick, steamID, spamCount) ->
+likelySpamResponse = (ply, nick, steamID, ip, command, spamCount) ->
     alertMessage = "Player likely spamming commands! #{nick} (#{steamID}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
     warnLog alertMessage
     Section580.Alerter\alertStaff steamID, nick, command, "likely"
@@ -157,7 +158,7 @@ shouldIgnore = (ply, command) ->
 
     -- Likely spam for specific command
     if spamCount > commandSpamThreshold
-        likelySpamResponse nick, steamID, spamCount
+        likelySpamResponse ply, nick, steamID, ip, command, spamCount
         return true
 
     return false
