@@ -1,5 +1,4 @@
 import lower from string
-import ConsoleCommand from game
 import Left, find from string
 
 pcall = pcall
@@ -71,7 +70,8 @@ boot = ( steamId, ip, nick ) ->
     -- Removes port number
     cleanIP = Left ip, find(ip, ":", 7, true) - 1
 
-    ConsoleCommand "addip 10 #{cleanIP};writeip\n"
+    RunConsoleCommand "addip", 10, cleanIP
+    RunConsoleCommand "writeip"
     timerSimple 1, -> ULib.addBan steamId, 10, kickReason, nick
 
     rawset pendingAction, ip, true

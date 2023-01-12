@@ -1,7 +1,6 @@
 import ReadHeader from net
 import NetworkIDToString from util
 import lower from string
-import ConsoleCommand from game
 import Left, find from string
 
 pcall = pcall
@@ -68,7 +67,8 @@ boot = ( ply, steamId, ip ) ->
     -- Removes port number
     cleanIP = Left ip, find(ip, ":", 7, true) - 1
 
-    RunConsoleCommand "addip 10 #{cleanIP};writeip\n"
+    RunConsoleCommand "addip", 10, cleanIP
+    RunConsoleCommand "writeip"
     warnLog "Booted player: SteamID: #{steamId} | IP: #{ip}", true
 
     timerSimple 1, -> ULib.addBan steamId, 10, kickReason

@@ -1,5 +1,4 @@
 import rawget, rawset from _G
-import ConsoleCommand from game
 import time from os
 
 export Section580
@@ -54,7 +53,8 @@ tallyForPlayer = (steamID, name, ip) ->
 
     warnLog "Spam connections from IP: #{ip} - Banning: #{connectShouldBan}", true
 
-    ConsoleCommand "addip #{connectSpamBanLength} #{ip};writeip\n"
+    RunConsoleCommand "addip", connectSpamBanLength, ip
+    RunConsoleCommand "writeip"
     rawset bans, steamID, banDetails steamID, name
 
 gameevent.Listen "player_connect"
