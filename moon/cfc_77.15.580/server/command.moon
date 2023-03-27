@@ -97,7 +97,7 @@ totalSpamResponse = (ply, nick, steamID, ip, totalCount) ->
 
     sendAlert steamID, nick, ip, nil, spamCount, "extreme"
 
-likelySpamResponse = (nick, steamID, spamCount) ->
+likelySpamResponse = (nick, steamID, spamCount, command) ->
     alertMessage = "Player likely spamming commands! #{nick} (#{steamID}) is spamming: '#{command}' (Count: #{spamCount} per #{commandClearTime} seconds)"
     warnLog alertMessage
     Section580.Alerter\alertStaff steamID, nick, command, "likely"
@@ -157,7 +157,7 @@ shouldIgnore = (ply, command) ->
 
     -- Likely spam for specific command
     if spamCount > commandSpamThreshold
-        likelySpamResponse nick, steamID, spamCount
+        likelySpamResponse nick, steamID, spamCount, command
         return true
 
     return false
